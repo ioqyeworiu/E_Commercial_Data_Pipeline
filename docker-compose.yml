@@ -32,6 +32,8 @@ services:
     stop_grace_period: 60s
     ports:
       - "127.0.0.1:9092:9092"
+    cpus: 1
+    mem_limit: 1g
     environment:
       # KRaft identity and roles
       KAFKA_NODE_ID: 1
@@ -94,8 +96,6 @@ services:
     networks:
       - kafka-net
     
-
-
 networks:
   crawler-net:
     name: crawler-net
