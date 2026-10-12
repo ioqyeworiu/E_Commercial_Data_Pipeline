@@ -1,0 +1,109 @@
+services:
+  postgres_crawler_storage:
+    image: pgvector/pgvector:0.8.6-pg18-trixie
+    container_name: pg_crawler_db
+    hostname: pg_crawler_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - D:/docker_mount2/postgresql:/var/lib/postgresql
+    environment:
+      POSTGRES_USERNAME_FILE: /run/secrets/db_admin_username
+      POSTGRES_PASSWORD_FILE: /run/secrets/db_admin_password
+    secrets:
+      - db_admin_username
+      - db_admin_password
+    networks:
+      - crawler-net
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U admin" ]
+      interval: 1m30s
+      timeout: 30s
+      retries: 5
+      start_period: 300s
+  
+  kafka_1:
+    image: apache/kafka:4.4.0-rc4
+    container_name: kafka_1
+    hostname: kafka-1
+    restart: unless-stopped
+    stop_grace_period: 60s
+    ports:
+      - "127.0.0.1:9092:9092"
+    environment:
+      # KRaft identity and roles
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      CLUSTER_ID: ylDN-uoLRqKZtQnKtIwKPw
+      # Three listeners:
+      # HOST: host machine
+      # INTERNAL: other Docker containers
+      # CONTROLLER: KRaft metadata quorum
+      KAFKA_LISTENERS: >-
+        HOST://0.0.0.0:9092,
+        INTERNAL://0.0.0.0:9093,
+        CONTROLLER://0.0.0.0:9094
+      KAFKA_ADVERTISED_LISTENERS: >-
+        HOST://localhost:9092,
+        INTERNAL://kafka-1:9093
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: >-
+        HOST:PLAINTEXT,
+        INTERNAL:PLAINTEXT,
+        CONTROLLER:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka-1:9094
+      # Single-broker replication settings
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_DEFAULT_REPLICATION_FACTOR: 1
+      KAFKA_MIN_INSYNC_REPLICAS: 1
+      # Topic defaults
+      KAFKA_NUM_PARTITIONS: 3
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"
+      # Retention
+      KAFKA_LOG_RETENTION_HOURS: 168
+      KAFKA_LOG_SEGMENT_BYTES: 1073741824
+      KAFKA_LOG_RETENTION_BYTES: 10737418240
+      # Message size limits
+      KAFKA_MESSAGE_MAX_BYTES: 10485760
+      KAFKA_REPLICA_FETCH_MAX_BYTES: 10485760
+      KAFKA_SOCKET_REQUEST_MAX_BYTES: 104857600
+      # Group coordination
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      # JVM
+      KAFKA_HEAP_OPTS: "-Xms1G -Xmx1G"
+      # Log storage
+      KAFKA_LOG_DIRS: /var/lib/kafka/data
+    volumes:
+      - D:/docker_mount_doan/kafka_1/data:/var/lib/kafka/data
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - >-
+          /opt/kafka/bin/kafka-broker-api-versions.sh
+          --bootstrap-server localhost:9092 >/dev/null 2>&1
+          || exit 1
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 40s
+    networks:
+      - kafka-net
+    
+
+
+networks:
+  crawler-net:
+    name: crawler-net
+    driver: bridge
+  kafka-net:
+    name: kafka-net
+    driver: bridge
+
+secrets:
+  db_admin_username:
+    file: ./docker_secrets/postgres_admin/db_admin_username.txt
+  db_admin_password:
+    file: ./docker_secrets/postgres_admin/db_admin_password.txt
