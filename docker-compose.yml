@@ -5,6 +5,8 @@ services:
     hostname: pg_crawler_db
     ports:
       - "5432:5432"
+    cpus: 1
+    mem_limit: 1g
     volumes:
       - D:/docker_mount2/postgresql:/var/lib/postgresql
     environment:
@@ -77,7 +79,7 @@ services:
       # Log storage
       KAFKA_LOG_DIRS: /var/lib/kafka/data
     volumes:
-      - D:/docker_mount_doan/kafka_1/data:/var/lib/kafka/data
+      - D:/docker_mount2/kafka_1/data:/var/lib/kafka/data
     healthcheck:
       test:
         - CMD-SHELL
