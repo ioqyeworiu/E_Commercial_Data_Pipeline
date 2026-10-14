@@ -11,14 +11,15 @@ import os
 from dotenv import load_dotenv
 from time import sleep, monotonic
 from uuid import uuid4
+from bs4 import BeautifulSoup
+import pandas as pd
 
 load_dotenv(override=True)
 
 CACHE_CLEAR_INTERVAL = 25         # cứ mỗi 25 URL thì dọn cache (nếu chưa tới lúc restart)
-RESTART_INTERVAL = 100             # cứ mỗi 50 URL thì restart driver, bất kể RAM
+RESTART_INTERVAL = 200             # cứ mỗi 50 URL thì restart driver, bất kể RAM
 MAX_DRIVER_MEMORY_MB = 2000       # hoặc RAM vượt ngưỡng này thì restart sớm hơn
 DEFAULT_BATCH_SIZE = 500
-CRAWL_SLEEP_AFTER_LOAD = 0.03     # đợi sau khi driver.get() trước khi lấy page_source
 EMPTY_BATCH_SLEEP = 3             # nghỉ khi không còn URL nào cần crawl
 POLL_INTERVAL = 0.1               # timeout cho producer.poll() trong poll thread
 KAFKA_TOPIC = 'product_data_changes'
@@ -29,7 +30,7 @@ DEFAULT_WINDOW_HEIGHT = 1080   # kích thước mặc định, quay lại sau kh
 
 def create_kafka_producer() -> Producer:
     return Producer({
-        "bootstrap.servers": "35.209.29.2:9092",
+        "bootstrap.servers": "localhost:9092",
         "client.id": f"refresh-crawler-{os.getpid()}-{uuid4().hex[:8]}",
         "acks": "all",
         "enable.idempotence": True,
@@ -195,7 +196,7 @@ class RefreshCrawler(BaseCrawler):
             t1 = monotonic()
             while True:
                 # Cuộn xuống từng đoạn ngắn 700 pixel
-                sleep(0.05) # Dừng lại để chờ Tiki gọi API và render HTML
+                sleep(0.1) # Dừng lại để chờ Tiki gọi API và render HTML
                 self.driver.execute_script("window.scrollBy(0, 700);")
                 
                 # Kiểm tra tọa độ hiện tại so với chiều cao tối đa của trang
@@ -207,27 +208,183 @@ class RefreshCrawler(BaseCrawler):
                     break
             html = self.driver.page_source
             
-            #đang sửa ở đây
+            try:
+                soup = BeautifulSoup(html, "html.parser")
+
+                # product title
+                title = soup.select_one('h1[class="sc-c0f8c612-0 dEurho"]')
+                if title:
+                    title = title.get_text(strip=True) 
+                    title = title if title else ""
+                    # print(f"Title: {title}" if not title else f"title: {title} - ok")
+
+                # product brand
+                brand = soup.select_one('a[data-view-id="pdp_details_view_brand"]')
+                if brand:
+                    brand = brand.get_text(strip=True)
+                    brand = brand if brand else ""
+                    # print(f"Brand: {brand}" if not brand else f"brand: {brand} - ok")
+
+                # product price
+                price = soup.select_one("div[product-price__original-price]")
+                if price: 
+                    price = price.get_text(strip=True)
+                    price = price.replace(".", "").replace(",", "")
+                    # print(f"Price: {price}" if not price else f"price: {price} - ok")
+                    price = float(price)
+
+                # product discount (vd "-25%" -> bo ky tu dau/cuoi la '-' va '%')
+                discount = soup.select_one("div[class='product-price__discount-rate']")
+                if discount:
+                    discount = discount.get_text(strip=True)
+                    discount = discount[1:-1]
+                    # print(f"Discount: {discount}" if not discount else f"discount: {discount} - ok")
+                    discount = float(discount)
+                else:
+                    discount = 0.0
+                
+                # product sell price
+                sellPrice = soup.select_one("div[class='product-price__current-price']")
+                if sellPrice:
+                    sellPrice = sellPrice.get_text(strip=True)
+                    sellPrice = sellPrice.replace(".", "").replace(",", "")
+                    # print(f"Sell Price: {sellPrice}" if not sellPrice else f"sell price: {sellPrice} - ok")                    
+                    sellPrice = float(sellPrice)
+                else:
+                    sellPrice = 0.0
+
+                # product quantity sold
+                sold = soup.select_one("div[class='sc-1a46a934-3 geGARt']")
+                if sold:
+                    tokens = sold.get_text(strip=True)
+                    tokens = tokens.split()
+                    sold = tokens[-1] if tokens else None
+                    # sold = int(sold)
+                    # print(f"Sold: {sold}" if not sold else f"sold: {sold} - ok")
+                else:
+                    sold = 0
+
+                # product rate and product rate count
+                rate_el = soup.select_one("div[class='sc-1a46a934-1 dCjKzJ']")
+                productRate = None
+                productRateCount = None
+                if rate_el:
+                    prodrate = rate_el.get_text(strip=True)
+                    productRate = prodrate[0:3]
+                    # print(f"Product Rate: {productRate}")
+                    productRate = float(prodrate[0:3])
+                    productRateCount = int(prodrate[3:].replace("(", "").replace(")", "").strip())
+                    # print(f"Product Rate: {productRate}, Product Rate Count: {productRateCount}" if not productRate or not productRateCount else f"product rate: {productRate} - {productRateCount} - ok")
+
+                # product category tree
+                cat_els = soup.select('a[class="breadcrumb-item"]')
+                categoryTree = [c.get_text(strip=True) for c in cat_els] if cat_els else None
+                if categoryTree:
+                    categoryTree = categoryTree[1:-1]
+                    categoryTree = " > ".join(categoryTree) if categoryTree else None
+                    # print(f"Category Tree: {categoryTree}" if not categoryTree else f"category tree: {categoryTree} - ok")
+                
+                # product brand origin, made in, warranty, and additional info
+                brandOrigin = ""
+                madeIn = ""
+                warranty = ""
+                additionalInfo = []
+                spans = soup.select("span")
+                for span in spans:
+                    if span:
+                        span_text = span.get_text(strip=True)
+                        sibling = span.find_next_sibling("span")
+                        next_span_text = sibling.get_text(strip=True) if sibling else None
+                        if span_text.find("Xuất xứ thương hiệu") != -1:
+                            brandOrigin = next_span_text or ""
+                        elif span_text.find("Made in") != -1:
+                            madeIn = next_span_text or ""
+                        elif span_text.find("Sản phẩm có được bảo hành không?") != -1:
+                            warranty = next_span_text or ""
+                        else:
+                            additionalInfo.append(f"key_{span_text}: value_{next_span_text}")
+                # print(f"Brand Origin: {brandOrigin}, Made In: {madeIn}, Warranty: {warranty}" if not brandOrigin or not madeIn or not warranty else f"brand origin: {brandOrigin} - made in: {madeIn} - warranty: {warranty} - ok")
+
+                # product description
+                descriptionDiv = soup.select_one('div[class="sc-f5219d7f-0 haxTPb"]')
+                description = ""
+                if descriptionDiv:
+                    paragraphs = [p.get_text(strip=True) for p in descriptionDiv.select("p") if p]
+                    description = "\n".join(paragraphs)
+                    # print(f"Description: {True if description else False}" if not description else "ok")
+                # seller name
+                seller = soup.select_one('span[class="seller-name"]')
+                if seller:
+                    seller = seller.get_text(strip=True)
+                    # print(f"Seller: {seller}" if not seller else f"seller: {seller} - ok")
+
+                # seller rate and seller rate count
+                sr_text = soup.select_one('div[class="item review"]')
+                sr_text = sr_text.get_text(strip=True).lower() if sr_text else None
+                sellerRate = None
+                sellerRateCount = None
+                # print(f"Seller Rate Text: {sr_text}")
+                if sr_text and not sr_text.__contains__("chưa có đánh giá"):
+                    sellerRateCount = sr_text[4:].replace("(", "").replace(")", "").strip() if len(sr_text) > 4 else None
+                    sellerRate = sr_text[:3]
+                    sellerRate = float(sellerRate) if sellerRate else None
+                # print(f"Seller Rate: {sellerRate}, Seller Rate Count: {sellerRateCount}" if not sellerRate or not sellerRateCount else f"seller rate: {sellerRate} - {sellerRateCount} - ok")
+                return pd.DataFrame([{
+                    "urlId": url_id,
+                    "title": title,
+                    "brand": brand,
+                    "price": price,
+                    "discount": discount,
+                    "sellPrice": sellPrice,
+                    "sold": sold,
+                    "productRate": productRate,
+                    "productRateCount": productRateCount,
+                    "categoryTree": categoryTree,
+                    "brandOrigin": brandOrigin,
+                    "madeIn": madeIn,
+                    "warranty": warranty,
+                    "description": description,
+                    "seller": seller,
+                    "sellerRate": sellerRate,
+                    "sellerRateCount": sellerRateCount,
+                    "additionalInfo": additionalInfo if additionalInfo else None,
+                }])
+
+            except Exception as e:
+                # HTML loi cau truc -> tra ve row voi cac field NOT NULL dien "",
+                # cac field nullable de None. Khong de 1 record loi lam crash ca batch.
+                print(e)
+                print(url)
+                return pd.DataFrame([{
+                    "urlId": "",
+                    "title": "", "brand": "", "price": None, "discount": None,
+                    "sellPrice": 0.0, "sold": None, "productRate": None,
+                    "productRateCount": None, "categoryTree": None, "brandOrigin": "",
+                    "madeIn": "", "warranty": "", "description": "",
+                    "seller": "", "sellerRate": None, "sellerRateCount": None,
+                    "additionalInfo": None,
+                }])
             
-            #kết thúc sửa ở đây
+            finally:
+                t2 = monotonic()
+                logger.info(f"Finished crawling URL {url_id} in {t2 - t0:.2f} seconds (load: {t1 - t0:.2f}s, scroll: {t2 - t1:.2f}s)")
         
-            t2 = monotonic()
-    
-            logger.info(f"Finished crawling URL {url_id} in {t2 - t0:.2f} seconds (load: {t1 - t0:.2f}s, scroll: {t2 - t1:.2f}s)")
-            return html
+            # t2 = monotonic()
+            # logger.info(f"Finished crawling URL {url_id} in {t2 - t0:.2f} seconds (load: {t1 - t0:.2f}s, scroll: {t2 - t1:.2f}s)")
+            # return html
         
         except Exception as e:
             logger.error(f"Error occurred while fetching URL {url}: {e}")
             return None
     
-    def _send_to_kafka(self, url_id, html: str) -> None:
-        html_bytes = html.encode('utf-8')
+    def _send_to_kafka(self, url_id, record: pd.DataFrame) -> None:
+        message = record.to_json(orient="records", date_format="iso").encode("utf-8")
         cb = partial(delivery_report, url_id=url_id)
         try:
             self.producer.produce(
                 topic=KAFKA_TOPIC,
                 key=str(url_id).encode('utf-8'),
-                value=html_bytes,
+                value=message,
                 callback=cb,
             )
         except BufferError:
@@ -236,7 +393,7 @@ class RefreshCrawler(BaseCrawler):
             self.producer.produce(
                 topic=KAFKA_TOPIC,
                 key=str(url_id).encode('utf-8'),
-                value=html_bytes,
+                value=message,
                 callback=cb,
             )
 
@@ -258,15 +415,15 @@ class RefreshCrawler(BaseCrawler):
                 for row in rows:
                     url_id, url = row[0], row[1]
 
-                    html = self._crawl_one(url_id, url)
+                    record = self._crawl_one(url_id, url)
 
                     urls_since_restart += 1
                     urls_since_restart = maintain_driver_health(self, urls_since_restart)
 
-                    if html is None:
+                    if record is None:
                         continue
 
-                    self._send_to_kafka(url_id, html)
+                    self._send_to_kafka(url_id, record)
 
         except KeyboardInterrupt:
             logger.info("KeyboardInterrupt received, stopping crawler...")
