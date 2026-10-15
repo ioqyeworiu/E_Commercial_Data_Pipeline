@@ -2,21 +2,21 @@ services:
   postgres_crawler_storage:
     image: pgvector/pgvector:0.8.6-pg18-trixie
     container_name: pg_crawler_db
-    hostname: pg_crawler_db
+    hostname: pg-crawler-db
     ports:
       - "5432:5432"
     cpus: 1
     mem_limit: 1g
     volumes:
-      - D:/docker_mount2/postgresql:/var/lib/postgresql
+      - ./docker_mount/postgresql:/var/lib/postgresql
     environment:
-      POSTGRES_USERNAME_FILE: /run/secrets/db_admin_username
-      POSTGRES_PASSWORD_FILE: /run/secrets/db_admin_password
+      POSTGRES_USERNAME_FILE: /run/secrets/postgresql_admin_username
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgresql_admin_password
     secrets:
-      - db_admin_username
-      - db_admin_password
+      - postgresql_admin_username
+      - postgresql_admin_password
     networks:
-      - crawler-net
+      - postgresql-net
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U admin" ]
       interval: 1m30s
@@ -31,7 +31,7 @@ services:
     restart: unless-stopped
     stop_grace_period: 60s
     ports:
-      - "127.0.0.1:9092:9092"
+      - "9092:9092"
     cpus: 1
     mem_limit: 1g
     environment:
@@ -81,7 +81,7 @@ services:
       # Log storage
       KAFKA_LOG_DIRS: /var/lib/kafka/data
     volumes:
-      - D:/docker_mount2/kafka_1/data:/var/lib/kafka/data
+      - ./docker_mount/kafka_1/data:/var/lib/kafka/data
     healthcheck:
       test:
         - CMD-SHELL
@@ -95,17 +95,183 @@ services:
       start_period: 40s
     networks:
       - kafka-net
+
+  spark_master:
+    image: spark:4.2.0-scala2.13-java21-python3-ubuntu
+    container_name: spark_master
+    hostname: spark-master
+    restart: unless-stopped
+    init: true
+    command: 
+      - /opt/spark/bin/spark-class
+      - org.apache.spark.deploy.master.Master
+      - --host 
+      - spark-master
+      - --port 
+      - "7077"
+      - --webui-port 
+      - "8080"
+    ports:
+      - "7077:7077"
+      - "8080:8080"
+    cpus: 1
+    mem_limit: 1g
+    volumes:
+      - ./docker_mount/spark_standalone/spark_master/logs:/opt/spark/logs
+    networks:
+      - spark-net
+      - kafka-net
+      - clickhouse-net
+  
+  spark-worker-1:
+    image: spark:4.2.0-scala2.13-java21-python3-ubuntu
+    container_name: spark_worker_1
+    hostname: spark-worker-1
+    restart: unless-stopped
+    init: true
+    depends_on:
+      - spark_master
+    command:
+      - /opt/spark/bin/spark-class
+      - org.apache.spark.deploy.worker.Worker
+      - --host 
+      - spark-worker-1
+      - --cores
+      - "2"
+      - --memory
+      - "3g"
+      - --webui-port 
+      - "8081"
+      - --work-dir
+      - /opt/spark/work
+      - spark://spark-master:7077
+    ports:
+      - "8081:8081"
+    cpus: 2
+    mem_limit: 3g
+    volumes:
+      - ./docker_mount/spark_standalone/spark_worker_1/logs:/opt/spark/logs
+      - ./docker_mount/spark_standalone/spark_worker_1/work:/opt/spark/work
+    networks:
+      - spark-net
+      - kafka-net
+      - clickhouse-net
+
+  spark-worker-2:
+    image: spark:4.2.0-scala2.13-java21-python3-ubuntu
+    container_name: spark_worker_2
+    hostname: spark-worker-2
+    restart: unless-stopped
+    init: true
+    depends_on:
+      - spark_master
+    command:
+      - /opt/spark/bin/spark-class
+      - org.apache.spark.deploy.worker.Worker
+      - --host 
+      - spark-worker-2
+      - --cores
+      - "2"
+      - --memory
+      - "3g"
+      - --webui-port 
+      - "8082"
+      - --work-dir
+      - /opt/spark/work
+      - spark://spark-master:7077
+    ports:
+      - "8082:8082"
+    cpus: 2
+    mem_limit: 3g
+    volumes:
+      - ./docker_mount/spark_standalone/spark_worker_2/logs:/opt/spark/logs
+      - ./docker_mount/spark_standalone/spark_worker_2/work:/opt/spark/work
+    networks:
+      - spark-net
+      - kafka-net
+      - clickhouse-net
+  
+  spark-history:
+    image: spark:4.2.0-scala2.13-java21-python3-ubuntu
+    container_name: spark_history
+    hostname: spark-history
+    restart: unless-stopped
+    init: true
+    depends_on:
+      - spark_master
+    command:
+      - /opt/spark/bin/spark-class
+      - org.apache.spark.deploy.history.HistoryServer
+    ports:
+      - "18080:18080"
+    cpus: 1
+    mem_limit: 1g
+    volumes:
+      - ./docker_mount/spark_standalone/spark_history/logs:/opt/spark/logs
+      - ./docker_mount/spark_standalone/conf/history-spark-defaults.conf:/opt/spark/conf/spark-defaults.conf:ro
+      - ./docker_mount/spark_standalone/spark_history/events:/opt/spark/events:ro
+      - ./docker_mount/spark_standalone/spark_history/store:/opt/spark/store/path
+    networks:
+      - spark-net
     
+  clickhouse-server:
+    image: clickhouse/clickhouse-server:head-distroless
+    container_name: clickhouse_server
+    hostname: clickhouse-server
+    restart: unless-stopped
+    ports:
+      - "8123:8123"  
+      - "9000:9000"
+    cpus: 1
+    mem_limit: 2g
+    environment:
+      CLICKHOUSE_USER: clickhouse
+      CLICKHOUSE_PASSWORD_FILE: /run/secrets/clickhouse_admin_password
+      CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: "1"
+      TZ: Asia/Ho_Chi_Minh
+    secrets:
+      - clickhouse_admin_username
+      - clickhouse_admin_password
+    ulimits:
+      nofile:
+        soft: 262144
+        hard: 262144
+    volumes:
+      - ./docker_mount/clickhouse/data:/var/lib/clickhouse
+      - ./docker_mount/clickhouse/logs:/var/log/clickhouse-server
+    healthcheck:
+      test:
+        - CMD
+        - >-
+          clickhouse-client
+          --user=clickhouse
+          --password=/run/secrets/clickhouse_admin_password
+          --query='SELECT 1'      
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
 networks:
-  crawler-net:
-    name: crawler-net
+  postgresql-net:
+    name: postgresql-net
     driver: bridge
   kafka-net:
     name: kafka-net
     driver: bridge
+  spark-net:
+    name: spark-net
+    driver: bridge
+  clickhouse-net:
+    name: clickhouse-net
+    driver: bridge
 
 secrets:
-  db_admin_username:
-    file: ./docker_secrets/postgres_admin/db_admin_username.txt
-  db_admin_password:
-    file: ./docker_secrets/postgres_admin/db_admin_password.txt
+  postgresql_admin_username:
+    file: ./docker_secrets/postgresql_admin_username.txt
+  postgresql_admin_password:
+    file: ./docker_secrets/postgresql_admin_password.txt
+  clickhouse_admin_username:
+    file: ./docker_secrets/clickhouse_admin_username.txt
+  clickhouse_admin_password:
+    file: ./docker_secrets/clickhouse_admin_password.txt
