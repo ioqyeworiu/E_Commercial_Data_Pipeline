@@ -48,7 +48,7 @@ services:
         INTERNAL://0.0.0.0:9093,
         CONTROLLER://0.0.0.0:9094
       KAFKA_ADVERTISED_LISTENERS: >-
-        HOST://localhost:9092,
+        HOST://kafka-1:9092,
         INTERNAL://kafka-1:9093
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: >-
         HOST:PLAINTEXT,
@@ -67,7 +67,7 @@ services:
       KAFKA_NUM_PARTITIONS: 3
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"
       # Retention
-      KAFKA_LOG_RETENTION_HOURS: 168
+      KAFKA_LOG_RETENTION_HOURS: 8760
       KAFKA_LOG_SEGMENT_BYTES: 1073741824
       KAFKA_LOG_RETENTION_BYTES: 10737418240
       # Message size limits
@@ -97,7 +97,11 @@ services:
       - kafka-net
 
   spark_master:
-    image: spark:4.2.0-scala2.13-java21-python3-ubuntu
+    # image: spark:4.2.0-scala2.13-java21-python3-ubuntu
+    build:
+      context: .
+      dockerfile: dockerfile.spark
+    image: spark-custom:4.2.0-scala2.13-java21-python3-ubuntu
     container_name: spark_master
     hostname: spark-master
     restart: unless-stopped
@@ -106,7 +110,7 @@ services:
       - /opt/spark/bin/spark-class
       - org.apache.spark.deploy.master.Master
       - --host 
-      - spark-master
+      - 0.0.0.0
       - --port 
       - "7077"
       - --webui-port 
@@ -114,6 +118,7 @@ services:
     ports:
       - "7077:7077"
       - "8080:8080"
+      - "4040:4040"
     cpus: 1
     mem_limit: 1g
     volumes:
@@ -122,24 +127,32 @@ services:
       - spark-net
       - kafka-net
       - clickhouse-net
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c '</dev/tcp/spark-master/7077' || exit 1"]
+      interval: 1m30s
+      timeout: 30s
+      retries: 5
+      start_period: 30s
   
   spark-worker-1:
-    image: spark:4.2.0-scala2.13-java21-python3-ubuntu
+    image: spark-custom:4.2.0-scala2.13-java21-python3-ubuntu
     container_name: spark_worker_1
     hostname: spark-worker-1
     restart: unless-stopped
     init: true
     depends_on:
-      - spark_master
+      spark_master:
+        condition: service_healthy
+
     command:
       - /opt/spark/bin/spark-class
       - org.apache.spark.deploy.worker.Worker
       - --host 
       - spark-worker-1
       - --cores
-      - "2"
+      - "1"
       - --memory
-      - "3g"
+      - "1g"
       - --webui-port 
       - "8081"
       - --work-dir
@@ -147,8 +160,8 @@ services:
       - spark://spark-master:7077
     ports:
       - "8081:8081"
-    cpus: 2
-    mem_limit: 3g
+    cpus: 1
+    mem_limit: 1g
     volumes:
       - ./docker_mount/spark_standalone/spark_worker_1/logs:/opt/spark/logs
       - ./docker_mount/spark_standalone/spark_worker_1/work:/opt/spark/work
@@ -158,22 +171,23 @@ services:
       - clickhouse-net
 
   spark-worker-2:
-    image: spark:4.2.0-scala2.13-java21-python3-ubuntu
+    image: spark-custom:4.2.0-scala2.13-java21-python3-ubuntu
     container_name: spark_worker_2
     hostname: spark-worker-2
     restart: unless-stopped
     init: true
     depends_on:
-      - spark_master
+      spark_master:
+        condition: service_healthy
     command:
       - /opt/spark/bin/spark-class
       - org.apache.spark.deploy.worker.Worker
       - --host 
       - spark-worker-2
       - --cores
-      - "2"
+      - "1"
       - --memory
-      - "3g"
+      - "1g"
       - --webui-port 
       - "8082"
       - --work-dir
@@ -181,8 +195,8 @@ services:
       - spark://spark-master:7077
     ports:
       - "8082:8082"
-    cpus: 2
-    mem_limit: 3g
+    cpus: 1
+    mem_limit: 1g
     volumes:
       - ./docker_mount/spark_standalone/spark_worker_2/logs:/opt/spark/logs
       - ./docker_mount/spark_standalone/spark_worker_2/work:/opt/spark/work
@@ -192,13 +206,14 @@ services:
       - clickhouse-net
   
   spark-history:
-    image: spark:4.2.0-scala2.13-java21-python3-ubuntu
+    image: spark-custom:4.2.0-scala2.13-java21-python3-ubuntu
     container_name: spark_history
     hostname: spark-history
     restart: unless-stopped
     init: true
     depends_on:
-      - spark_master
+      spark_master:
+        condition: service_healthy
     command:
       - /opt/spark/bin/spark-class
       - org.apache.spark.deploy.history.HistoryServer
@@ -215,7 +230,7 @@ services:
       - spark-net
     
   clickhouse-server:
-    image: clickhouse/clickhouse-server:head-distroless
+    image: clickhouse/clickhouse-server:26.7-distroless
     container_name: clickhouse_server
     hostname: clickhouse-server
     restart: unless-stopped
@@ -223,7 +238,7 @@ services:
       - "8123:8123"  
       - "9000:9000"
     cpus: 1
-    mem_limit: 2g
+    mem_limit: 1g
     environment:
       CLICKHOUSE_USER: clickhouse
       CLICKHOUSE_PASSWORD_FILE: /run/secrets/clickhouse_admin_password
@@ -239,6 +254,8 @@ services:
     volumes:
       - ./docker_mount/clickhouse/data:/var/lib/clickhouse
       - ./docker_mount/clickhouse/logs:/var/log/clickhouse-server
+    networks:
+      - clickhouse-net
     healthcheck:
       test:
         - CMD
