@@ -2,6 +2,8 @@ from pyspark.sql import SparkSession
 from pyspark.sql import functions as F
 from pyspark.sql.types import StructType, StructField, StringType, ArrayType, TimestampType
 
+from spark_kafka_to_clickhouse_eval import CsvMetricsListener
+
 # ====== CẤU HÌNH (sửa cho khớp môi trường của bạn) ======
 KAFKA_BOOTSTRAP = "kafka-1:9092"
 KAFKA_TOPIC = "product_data_changes"
@@ -12,6 +14,10 @@ CLICKHOUSE_PASSWORD = 123456
 CHECKPOINT_DIR = "/tmp/checkpoint/product_changes"
 
 spark = SparkSession.builder.appName("kafka_to_clickhouse").getOrCreate()
+# Đăng ký Listener
+csv_path = "/opt/spark/metrics/streaming_metrics.csv"
+spark.streams.addListener(CsvMetricsListener(csv_path))
+
 spark.sparkContext.setLogLevel("WARN")
 
 # ====== 1. ĐỌC TỪ KAFKA ======
