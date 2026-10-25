@@ -121,6 +121,9 @@ services:
       - "4040:4040"
     cpus: 1
     mem_limit: 1g
+    environment:
+      SPARK_DRIVER_HOST: spark-master
+      SPARK_DRIVER_BIND_ADDRESS: 0.0.0.0
     volumes:
       - ./docker_mount/spark_standalone/spark_master/logs:/opt/spark/logs
     networks:
@@ -152,7 +155,7 @@ services:
       - --cores
       - "1"
       - --memory
-      - "1g"
+      - "2g"
       - --webui-port 
       - "8081"
       - --work-dir
@@ -161,7 +164,7 @@ services:
     ports:
       - "8081:8081"
     cpus: 1
-    mem_limit: 1g
+    mem_limit: 2g
     volumes:
       - ./docker_mount/spark_standalone/spark_worker_1/logs:/opt/spark/logs
       - ./docker_mount/spark_standalone/spark_worker_1/work:/opt/spark/work
@@ -187,7 +190,7 @@ services:
       - --cores
       - "1"
       - --memory
-      - "1g"
+      - "2g"
       - --webui-port 
       - "8082"
       - --work-dir
@@ -196,7 +199,7 @@ services:
     ports:
       - "8082:8082"
     cpus: 1
-    mem_limit: 1g
+    mem_limit: 2g
     volumes:
       - ./docker_mount/spark_standalone/spark_worker_2/logs:/opt/spark/logs
       - ./docker_mount/spark_standalone/spark_worker_2/work:/opt/spark/work
@@ -205,29 +208,29 @@ services:
       - kafka-net
       - clickhouse-net
   
-  spark-history:
-    image: spark-custom:4.2.0-scala2.13-java21-python3-ubuntu
-    container_name: spark_history
-    hostname: spark-history
-    restart: unless-stopped
-    init: true
-    depends_on:
-      spark_master:
-        condition: service_healthy
-    command:
-      - /opt/spark/bin/spark-class
-      - org.apache.spark.deploy.history.HistoryServer
-    ports:
-      - "18080:18080"
-    cpus: 1
-    mem_limit: 1g
-    volumes:
-      - ./docker_mount/spark_standalone/spark_history/logs:/opt/spark/logs
-      - ./docker_mount/spark_standalone/conf/history-spark-defaults.conf:/opt/spark/conf/spark-defaults.conf:ro
-      - ./docker_mount/spark_standalone/spark_history/events:/opt/spark/events:ro
-      - ./docker_mount/spark_standalone/spark_history/store:/opt/spark/store/path
-    networks:
-      - spark-net
+  # spark-history:
+  #   image: spark-custom:4.2.0-scala2.13-java21-python3-ubuntu
+  #   container_name: spark_history
+  #   hostname: spark-history
+  #   restart: unless-stopped
+  #   init: true
+  #   depends_on:
+  #     spark_master:
+  #       condition: service_healthy
+  #   command:
+  #     - /opt/spark/bin/spark-class
+  #     - org.apache.spark.deploy.history.HistoryServer
+  #   ports:
+  #     - "18080:18080"
+  #   cpus: 1
+  #   mem_limit: 1g
+  #   volumes:
+  #     - ./docker_mount/spark_standalone/spark_history/logs:/opt/spark/logs
+  #     - ./docker_mount/spark_standalone/conf/history-spark-defaults.conf:/opt/spark/conf/spark-defaults.conf:ro
+  #     - ./docker_mount/spark_standalone/spark_history/events:/opt/spark/events:ro
+  #     - ./docker_mount/spark_standalone/spark_history/store:/opt/spark/store/path
+  #   networks:
+  #     - spark-net
     
   clickhouse-server:
     image: clickhouse/clickhouse-server:26.7-distroless
@@ -238,7 +241,7 @@ services:
       - "8123:8123"  
       - "9000:9000"
     cpus: 1
-    mem_limit: 1g
+    mem_limit: 2g
     environment:
       CLICKHOUSE_USER: clickhouse
       CLICKHOUSE_PASSWORD_FILE: /run/secrets/clickhouse_admin_password

@@ -127,6 +127,7 @@ query = (
     clean.writeStream
     .foreachBatch(write_to_clickhouse)
     .option("checkpointLocation", CHECKPOINT_DIR)
+    .trigger(processingTime="10 seconds")
     .start()
 )
 query.awaitTermination()
