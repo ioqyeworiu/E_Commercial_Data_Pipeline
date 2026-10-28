@@ -223,7 +223,7 @@ class BaseCrawler(ABC):
         options.add_argument("--disable-extensions")
         options.add_argument("--disable-infobars")
         options.add_argument("--disable-notifications")
-        options.add_argument("--blink-settings=imagesEnabled=false")
+        # options.add_argument("--blink-settings=imagesEnabled=false")
         options.add_argument("--media-cache-size=1")
 
         if self.user_agent:

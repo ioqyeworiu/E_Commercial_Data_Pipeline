@@ -30,7 +30,7 @@ DEFAULT_WINDOW_HEIGHT = 1080   # kích thước mặc định, quay lại sau kh
 
 def create_kafka_producer() -> Producer:
     return Producer({
-        "bootstrap.servers": "localhost:9092",
+        "bootstrap.servers": "kafka-1:9092",
         "client.id": f"refresh-crawler-{os.getpid()}-{uuid4().hex[:8]}",
         "acks": "all",
         "enable.idempotence": True,
@@ -194,18 +194,14 @@ class RefreshCrawler(BaseCrawler):
             t0 = monotonic()
             self.driver.get(url)
             t1 = monotonic()
+            last_position = self.driver.execute_script("return window.pageYOffset;")
             while True:
-                # Cuộn xuống từng đoạn ngắn 700 pixel
-                sleep(0.1) # Dừng lại để chờ Tiki gọi API và render HTML
                 self.driver.execute_script("window.scrollBy(0, 700);")
-                
-                # Kiểm tra tọa độ hiện tại so với chiều cao tối đa của trang
-                new_height = self.driver.execute_script("return document.body.scrollHeight")
-                current_position = self.driver.execute_script("return window.pageYOffset + window.innerHeight")
-                
-                # Dừng lại khi cuộn chạm đáy
-                if current_position >= new_height:
+                sleep(0.1) 
+                new_position = self.driver.execute_script("return window.pageYOffset;")
+                if new_position == last_position:
                     break
+                last_position = new_position
             html = self.driver.page_source
             
             try:
