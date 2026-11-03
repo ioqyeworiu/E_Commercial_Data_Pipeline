@@ -4,17 +4,22 @@ from base_crawler import BaseCrawler, logger
 from sqlalchemy import create_engine, text
 from functools import partial
 from threading import Thread
-from multiprocessing import Pool, Process
+from multiprocessing import Pool, Process, Lock
 import threading
 import psutil
 import os
 from dotenv import load_dotenv
-from time import sleep, monotonic
+from time import sleep
+from datetime import datetime
+from zoneinfo import ZoneInfo
 from uuid import uuid4
 from bs4 import BeautifulSoup
-import pandas as pd
+import csv
+import json
 
 load_dotenv(override=True)
+
+zone_info = ZoneInfo("Asia/Ho_Chi_Minh")
 
 CACHE_CLEAR_INTERVAL = 25         # cứ mỗi 25 URL thì dọn cache (nếu chưa tới lúc restart)
 RESTART_INTERVAL = 200             # cứ mỗi 50 URL thì restart driver, bất kể RAM
@@ -27,6 +32,9 @@ KAFKA_TOPIC = 'product_data_changes'
 MAX_RESIZE_ITERATIONS = 6      # tránh resize vô hạn nếu trang lỗi/vô cực
 RESIZE_BUFFER_PX = 300         # dư ra để chắc chắn phần cuối trang cũng "nhìn thấy"
 DEFAULT_WINDOW_HEIGHT = 1080   # kích thước mặc định, quay lại sau khi crawl xong
+
+REFRESH_CRAWLER_METRIC_FILE = "evidence/w06/refresh_crawler_metric.csv"
+METRIC_FIELDS = ["url_id", "crawling_start_at", "observed_at", "crawling_end_at", "produced_at", "kafka_received_at", "kafka_partition", "kafka_offset", "error_message"]
 
 def create_kafka_producer() -> Producer:
     return Producer({
@@ -61,12 +69,6 @@ def get_url(db_engine, batch_size):
         )
         rows = result.fetchall()
     return rows
-
-def delivery_report(err, msg, url_id):
-    if err is not None:
-        logger.error(f"URL ID {url_id}: delivery failed: {err}")
-    else:
-        logger.info(f"URL ID {url_id}: delivered to {msg.topic()} [{msg.partition()}] at offset {msg.offset()}")
 
 def get_driver_memory_mb(driver) -> float:
     """
@@ -175,10 +177,20 @@ def maintain_driver_health(crawler, urls_since_restart: int) -> int:
 # Crawler chính
 # --------------------------------------------------------------------------- #
 class RefreshCrawler(BaseCrawler):
-    def __init__(self, kafka_producer, db_engine, **kwargs):
+    def __init__(self, kafka_producer, db_engine, metric_writer_lock, **kwargs):
         super().__init__(**kwargs)
         self.producer = kafka_producer
         self.db_engine = db_engine
+        self.metric_writer_lock = metric_writer_lock
+
+    def _write_metric(self, row: dict):
+        with self.metric_writer_lock:
+            file_exists = os.path.exists(REFRESH_CRAWLER_METRIC_FILE)
+            with open(REFRESH_CRAWLER_METRIC_FILE, "a", newline="", encoding="utf-8") as f:
+                writer = csv.DictWriter(f, fieldnames=METRIC_FIELDS)
+                if not file_exists:
+                    writer.writeheader()
+                writer.writerow(row)
 
     def _poll_loop(self, stop_event):
         # Chạy liên tục trong suốt vòng đời crawler, không chờ queue đầy
@@ -189,15 +201,16 @@ class RefreshCrawler(BaseCrawler):
             except Exception as e:
                 logger.error(f"Error occurred while polling Kafka: {e}")
 
-    def _crawl_one(self, url_id, url) -> str | None:
+    def _crawl_one(self, url_id, url) ->  dict | None:
+        record = {}
         try:
-            t0 = monotonic()
+            crawling_start_at = datetime.now(tz=zone_info) ########################
             self.driver.get(url)
-            t1 = monotonic()
+            observed_at = datetime.now(tz=zone_info) ########################
             last_position = self.driver.execute_script("return window.pageYOffset;")
             while True:
                 self.driver.execute_script("window.scrollBy(0, 700);")
-                sleep(0.1) 
+                sleep(0.15) 
                 new_position = self.driver.execute_script("return window.pageYOffset;")
                 if new_position == last_position:
                     break
@@ -206,7 +219,7 @@ class RefreshCrawler(BaseCrawler):
             
             try:
                 soup = BeautifulSoup(html, "html.parser")
-
+                
                 # product title
                 title = soup.select_one('h1[class="sc-c0f8c612-0 dEurho"]')
                 if title:
@@ -227,15 +240,14 @@ class RefreshCrawler(BaseCrawler):
                     price = price.get_text(strip=True)
                     price = price.replace(".", "").replace(",", "")
                     # print(f"Price: {price}" if not price else f"price: {price} - ok")
-                    price = float(price)
+                    # price = float(price)
 
-                # product discount (vd "-25%" -> bo ky tu dau/cuoi la '-' va '%')
                 discount = soup.select_one("div[class='product-price__discount-rate']")
                 if discount:
                     discount = discount.get_text(strip=True)
                     discount = discount[1:-1]
                     # print(f"Discount: {discount}" if not discount else f"discount: {discount} - ok")
-                    discount = float(discount)
+                    # discount = float(discount)
                 else:
                     discount = 0.0
                 
@@ -245,7 +257,7 @@ class RefreshCrawler(BaseCrawler):
                     sellPrice = sellPrice.get_text(strip=True)
                     sellPrice = sellPrice.replace(".", "").replace(",", "")
                     # print(f"Sell Price: {sellPrice}" if not sellPrice else f"sell price: {sellPrice} - ok")                    
-                    sellPrice = float(sellPrice)
+                    # sellPrice = float(sellPrice)
                 else:
                     sellPrice = 0.0
 
@@ -303,11 +315,9 @@ class RefreshCrawler(BaseCrawler):
 
                 # product description
                 descriptionDiv = soup.select_one('div[class="sc-f5219d7f-0 haxTPb"]')
-                description = ""
-                if descriptionDiv:
-                    paragraphs = [p.get_text(strip=True) for p in descriptionDiv.select("p") if p]
-                    description = "\n".join(paragraphs)
-                    # print(f"Description: {True if description else False}" if not description else "ok")
+                description = descriptionDiv.get_text(strip=True) if descriptionDiv else None
+                # print(f"Description: {True if description else False}" if not description else "ok")
+                
                 # seller name
                 seller = soup.select_one('span[class="seller-name"]')
                 if seller:
@@ -325,7 +335,7 @@ class RefreshCrawler(BaseCrawler):
                     sellerRate = sr_text[:3]
                     sellerRate = float(sellerRate) if sellerRate else None
                 # print(f"Seller Rate: {sellerRate}, Seller Rate Count: {sellerRateCount}" if not sellerRate or not sellerRateCount else f"seller rate: {sellerRate} - {sellerRateCount} - ok")
-                return pd.DataFrame([{
+                record = {
                     "urlId": url_id,
                     "title": title,
                     "brand": brand,
@@ -344,14 +354,15 @@ class RefreshCrawler(BaseCrawler):
                     "sellerRate": sellerRate,
                     "sellerRateCount": sellerRateCount,
                     "additionalInfo": additionalInfo if additionalInfo else None,
-                }])
+                    "observed_at": observed_at.isoformat(),
+                }
+                crawling_end_at = datetime.now(tz=zone_info) ########################
 
             except Exception as e:
                 # HTML loi cau truc -> tra ve row voi cac field NOT NULL dien "",
                 # cac field nullable de None. Khong de 1 record loi lam crash ca batch.
                 print(e)
-                print(url)
-                return pd.DataFrame([{
+                record = {
                     "urlId": "",
                     "title": "", "brand": "", "price": None, "discount": None,
                     "sellPrice": 0.0, "sold": None, "productRate": None,
@@ -359,23 +370,41 @@ class RefreshCrawler(BaseCrawler):
                     "madeIn": "", "warranty": "", "description": "",
                     "seller": "", "sellerRate": None, "sellerRateCount": None,
                     "additionalInfo": None,
-                }])
-            
+                    "observed_at": observed_at.isoformat(),
+                }
+                crawling_end_at = datetime.now(tz=zone_info) ########################
             finally:
-                t2 = monotonic()
-                logger.info(f"Finished crawling URL {url_id} in {t2 - t0:.2f} seconds (load: {t1 - t0:.2f}s, scroll: {t2 - t1:.2f}s)")
-        
-            # t2 = monotonic()
-            # logger.info(f"Finished crawling URL {url_id} in {t2 - t0:.2f} seconds (load: {t1 - t0:.2f}s, scroll: {t2 - t1:.2f}s)")
-            # return html
-        
+                metric_row = {
+                    "url_id": url_id,
+                    "crawling_start_at": crawling_start_at.isoformat(),
+                    "observed_at": observed_at.isoformat(),
+                    "crawling_end_at": crawling_end_at.isoformat(),
+                }        
+                return record, metric_row
         except Exception as e:
-            logger.error(f"Error occurred while fetching URL {url}: {e}")
-            return None
-    
-    def _send_to_kafka(self, url_id, record: pd.DataFrame) -> None:
-        message = record.to_json(orient="records", date_format="iso").encode("utf-8")
-        cb = partial(delivery_report, url_id=url_id)
+            logger.error(f"Error occurred while fetching URL {url} url_id{url_id}: {e}")
+            return None, None
+        
+    def _delivery_report(self, err, msg, url_id, metric_row):
+        kafka_received_at = datetime.now(tz=zone_info).isoformat() ########################
+        metric_row["kafka_received_at"] = kafka_received_at
+        if err is not None:
+            logger.error(f"URL ID {url_id}: delivery failed: {err}")
+            metric_row["kafka_partition"] = None
+            metric_row["kafka_offset"] = None
+            metric_row["error_message"] = str(err)
+        else:
+            metric_row["kafka_partition"] = msg.partition()
+            metric_row["kafka_offset"] = msg.offset()
+            metric_row["error_message"] = None
+            logger.info(f"Data on URL {url_id} to topic [{msg.topic()}] | partition [{msg.partition()}] | offset [{msg.offset()}]")
+        self._write_metric(metric_row)
+        
+    def _send_to_kafka(self, url_id, record: dict, metric_row: dict) -> None:
+        message = json.dumps(record).encode("utf-8")
+        cb = partial(self._delivery_report, url_id=url_id, metric_row=metric_row)
+        produce_at = datetime.now(tz=zone_info).isoformat() ########################
+        metric_row["produced_at"] = produce_at
         try:
             self.producer.produce(
                 topic=KAFKA_TOPIC,
@@ -392,6 +421,7 @@ class RefreshCrawler(BaseCrawler):
                 value=message,
                 callback=cb,
             )
+        logger.info(f"Data on URL {url_id} produced at {produce_at}")
 
     def run(self, *args) -> None:
         stop_event = threading.Event()
@@ -411,7 +441,7 @@ class RefreshCrawler(BaseCrawler):
                 for row in rows:
                     url_id, url = row[0], row[1]
 
-                    record = self._crawl_one(url_id, url)
+                    record, metric_row = self._crawl_one(url_id, url)
 
                     urls_since_restart += 1
                     urls_since_restart = maintain_driver_health(self, urls_since_restart)
@@ -419,7 +449,7 @@ class RefreshCrawler(BaseCrawler):
                     if record is None:
                         continue
 
-                    self._send_to_kafka(url_id, record)
+                    self._send_to_kafka(url_id, record, metric_row)
 
         except KeyboardInterrupt:
             logger.info("KeyboardInterrupt received, stopping crawler...")
@@ -431,10 +461,11 @@ class RefreshCrawler(BaseCrawler):
             if remaining > 0:
                 logger.warning("remaining %d not sent", remaining)
 
-def run_refresh_crawler(batch_size, profile_name):
+def run_refresh_crawler(batch_size, profile_name, metric_writer_lock):
     db_engine = create_engine(os.getenv("POSTGRES_URL"), pool_pre_ping=True)
     kafka_producer = create_kafka_producer()
     crawler = RefreshCrawler(
+        metric_writer_lock=metric_writer_lock,
         kafka_producer=kafka_producer,
         db_engine=db_engine,
         headless=True,
@@ -451,9 +482,11 @@ def run_refresh_crawler(batch_size, profile_name):
         crawler.stop()
 
 if __name__ == "__main__":
-    p1 = Process(target=run_refresh_crawler, args=(DEFAULT_BATCH_SIZE, "refresh1"))
-    p2 = Process(target=run_refresh_crawler, args=(DEFAULT_BATCH_SIZE, "refresh2"))
-    p3 = Process(target=run_refresh_crawler, args=(DEFAULT_BATCH_SIZE, "refresh3"))
+    metric_writer_lock = Lock()
+    
+    p1 = Process(target=run_refresh_crawler, args=(DEFAULT_BATCH_SIZE, "refresh1", metric_writer_lock))
+    p2 = Process(target=run_refresh_crawler, args=(DEFAULT_BATCH_SIZE, "refresh2", metric_writer_lock))
+    p3 = Process(target=run_refresh_crawler, args=(DEFAULT_BATCH_SIZE, "refresh3", metric_writer_lock))
     # p4 = Process(target=run_refresh_crawler, args=(DEFAULT_BATCH_SIZE, "refresh4"))
 
     p1.start()

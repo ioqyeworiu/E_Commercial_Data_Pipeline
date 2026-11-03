@@ -6,16 +6,21 @@ from base_crawler import BaseCrawler, logger
 from sqlalchemy import create_engine, text
 from functools import partial
 from threading import Thread
-from multiprocessing import Pool, Process
+from multiprocessing import Pool, Process, Lock
 import threading
 import psutil
 import json
 import os
 from dotenv import load_dotenv
 from time import sleep, monotonic
+from datetime import datetime
+from zoneinfo import ZoneInfo
 from uuid import uuid4
 from bs4 import BeautifulSoup
 import pandas as pd
+import csv
+
+time_zone = ZoneInfo("Asia/Ho_Chi_Minh")
 
 load_dotenv(override=True)
 
@@ -30,6 +35,9 @@ KAFKA_TOPIC = 'user_review'
 MAX_RESIZE_ITERATIONS = 6      # tránh resize vô hạn nếu trang lỗi/vô cực
 RESIZE_BUFFER_PX = 300         # dư ra để chắc chắn phần cuối trang cũng "nhìn thấy"
 DEFAULT_WINDOW_HEIGHT = 1080   # kích thước mặc định, quay lại sau khi crawl xong
+
+COMMENT_CRAWLER_METRIC_FILE = "evidence/w06/comment_crawler_metric.csv"
+METRIC_FIELDS = ["url_id", "crawling_start_at", "observed_at", "crawling_end_at", "produced_at", "kafka_received_at", "kafka_partition", "kafka_offset", "error_message"]
 
 def create_kafka_producer() -> Producer:
     return Producer({
@@ -64,12 +72,6 @@ def get_url(db_engine, batch_size):
         )
         rows = result.fetchall()
     return rows
-
-def delivery_report(err, msg, url_id):
-    if err is not None:
-        logger.error(f"URL ID {url_id}: delivery failed: {err}")
-    else:
-        logger.info(f"URL ID {url_id}: delivered to {msg.topic()} [{msg.partition()}] at offset {msg.offset()}")
 
 def get_driver_memory_mb(driver) -> float:
     """
@@ -178,10 +180,20 @@ def maintain_driver_health(crawler, urls_since_restart: int) -> int:
 # Crawler chính
 # --------------------------------------------------------------------------- #
 class CommentCrawler(BaseCrawler):
-    def __init__(self, kafka_producer, db_engine, **kwargs):
+    def __init__(self, kafka_producer, db_engine, metric_writer_lock, **kwargs):
         super().__init__(**kwargs)
         self.producer = kafka_producer
         self.db_engine = db_engine
+        self.metric_writer_lock = metric_writer_lock
+        
+    def _write_metric(self, row: dict):
+            with self.metric_writer_lock:
+                file_exists = os.path.exists(COMMENT_CRAWLER_METRIC_FILE)
+                with open(COMMENT_CRAWLER_METRIC_FILE, "a", newline="", encoding="utf-8") as f:
+                    writer = csv.DictWriter(f, fieldnames=METRIC_FIELDS)
+                    if not file_exists:
+                        writer.writeheader()
+                    writer.writerow(row)
 
     def _poll_loop(self, stop_event):
         # Chạy liên tục trong suốt vòng đời crawler, không chờ queue đầy
@@ -194,12 +206,13 @@ class CommentCrawler(BaseCrawler):
 
     def _crawl_one(self, url_id, url) -> str | None:
         try:
-            t0 = monotonic()
+            crawling_start_at = datetime.now(time_zone) ###################
             self.driver.get(url)
-            t1 = monotonic()
+            logger.info(f"Crawling review on URL {url_id}: {url}")
+            observed_at = datetime.now(time_zone)   ###################
             while True:
                 # Cuộn xuống từng đoạn ngắn 700 pixel
-                sleep(0.1) # Dừng lại để chờ Tiki gọi API và render HTML
+                sleep(0.15) # Dừng lại để chờ Tiki gọi API và render HTML
                 self.driver.execute_script("window.scrollBy(0, 700);")
                 
                 # Kiểm tra tọa độ hiện tại so với chiều cao tối đa của trang
@@ -209,7 +222,6 @@ class CommentCrawler(BaseCrawler):
                 # Dừng lại khi cuộn chạm đáy
                 if current_position >= new_height:
                     break
-                        
             try:
                 records = []
                 has_next_page = True
@@ -220,6 +232,7 @@ class CommentCrawler(BaseCrawler):
                         for customer_review in customer_reviews:
                             record = {}
                             try:
+                                record["url_id"] = url_id
                                 record["user_name"] = customer_review.find_element(By.XPATH, ".//div[@class='review-comment__user-name']").text
                                 record["joined_duration"] = customer_review.find_element(By.XPATH, ".//div[@class='review-comment__user-date']").text
                                 # print(record["user_name"], record["joined_duration"])
@@ -305,8 +318,8 @@ class CommentCrawler(BaseCrawler):
                             except StaleElementReferenceException as e:
                                 # WebDriverWait(driver, 10).until(EC.staleness_of(customer_reviews))
                                 break
+                            record["observed_at"] = observed_at.isoformat()
                             records.append(record)
-                            print(record)
                         try:
                             review_pagination = self.driver.find_element(By.XPATH, ".//div[@class='customer-reviews__pagination']")
                             next_button = review_pagination.find_element(By.XPATH, ".//a[@class='btn next']")
@@ -341,22 +354,39 @@ class CommentCrawler(BaseCrawler):
                         break
                     except StaleElementReferenceException as e:
                         #WebDriverWait(driver, 10).until(EC.staleness_of(customer_reviews))
-                        break
-                return records
+                        break                
             except Exception as e:
-                print(e)
                 print(url)
-                return ""
             finally:
-                t2 = monotonic()
-                logger.info(f"Finished crawling URL {url_id} in {t2 - t0:.2f} seconds (load: {t1 - t0:.2f}s, crawl_pages: {t2 - t1:.2f}s)")
+                crawling_end_at = datetime.now(time_zone)
+                metric_row = {
+                    "url_id": url_id,
+                    "crawling_start_at": crawling_start_at.isoformat(),
+                    "observed_at": observed_at.isoformat(),
+                    "crawling_end_at": crawling_end_at.isoformat(),
+                }
+                return records, metric_row
         except Exception as e:
-            logger.error(f"Error occurred while fetching URL {url}: {e}")
-            return None
+            logger.error(f"Error occurred while fetching URL {url} url_id{url_id}: {e}")
+            return None, None
+        
+    def delivery_report(self, err, msg, url_id, metric_row):
+        if err is not None:
+            logger.error(f"URL ID {url_id}: delivery failed: {err}")
+            metric_row["kafka_partition"] = None
+            metric_row["kafka_offset"] = None
+            metric_row["error_message"] = str(err)
+        else:
+            metric_row["kafka_partition"] = msg.partition()
+            metric_row["kafka_offset"] = msg.offset()
+            metric_row["error_message"] = None 
+            logger.info(f"Data on URL {url_id} to topic [{msg.topic()}] | partition [{msg.partition()}] | offset [{msg.offset()}]")
+        self._write_metric(metric_row)
     
-    def _send_to_kafka(self, url_id, records: list) -> None:
-        cb = partial(delivery_report, url_id=url_id)
+    def _send_to_kafka(self, url_id, records: list, metric_row: dict) -> None:
+        cb = partial(self.delivery_report, url_id=url_id, metric_row=metric_row)
         for record in records:
+            metric_row["produced_at"] = datetime.now(time_zone).isoformat()
             message = json.dumps(record, ensure_ascii=False).encode("utf-8")
             try:
                 self.producer.produce(
@@ -393,7 +423,7 @@ class CommentCrawler(BaseCrawler):
                 for row in rows:
                     url_id, url = row[0], row[1]
 
-                    records = self._crawl_one(url_id, url)
+                    records, metric_row = self._crawl_one(url_id, url)
 
                     urls_since_restart += 1
                     urls_since_restart = maintain_driver_health(self, urls_since_restart)
@@ -401,7 +431,7 @@ class CommentCrawler(BaseCrawler):
                     if records is None:
                         continue
 
-                    self._send_to_kafka(url_id, records)
+                    self._send_to_kafka(url_id, records, metric_row)
 
         except KeyboardInterrupt:
             logger.info("KeyboardInterrupt received, stopping crawler...")
@@ -413,10 +443,11 @@ class CommentCrawler(BaseCrawler):
             if remaining > 0:
                 logger.warning("remaining %d not sent", remaining)
 
-def run_comment_crawler(batch_size, profile_name):
+def run_comment_crawler(batch_size, profile_name, metric_writer_lock):
     db_engine = create_engine(os.getenv("POSTGRES_URL"), pool_pre_ping=True)
     kafka_producer = create_kafka_producer()
     crawler = CommentCrawler(
+        metric_writer_lock=metric_writer_lock,
         kafka_producer=kafka_producer,
         db_engine=db_engine,
         headless=True,
@@ -433,10 +464,12 @@ def run_comment_crawler(batch_size, profile_name):
         crawler.stop()
 
 if __name__ == "__main__":
-    p1 = Process(target=run_comment_crawler, args=(DEFAULT_BATCH_SIZE, "comment1"))
-    p2 = Process(target=run_comment_crawler, args=(DEFAULT_BATCH_SIZE, "comment2"))
-    p3 = Process(target=run_comment_crawler, args=(DEFAULT_BATCH_SIZE, "comment3"))
-    # p4 = Process(target=run_comment_crawler, args=(DEFAULT_BATCH_SIZE, "comment4"))
+    metric_writer_lock = Lock()
+    
+    p1 = Process(target=run_comment_crawler, args=(DEFAULT_BATCH_SIZE, "comment1", metric_writer_lock))
+    p2 = Process(target=run_comment_crawler, args=(DEFAULT_BATCH_SIZE, "comment2", metric_writer_lock))
+    p3 = Process(target=run_comment_crawler, args=(DEFAULT_BATCH_SIZE, "comment3", metric_writer_lock))
+    # p4 = Process(target=run_comment_crawler, args=(DEFAULT_BATCH_SIZE, "comment4", metric_writer_lock))
 
     p1.start()
     p2.start()
