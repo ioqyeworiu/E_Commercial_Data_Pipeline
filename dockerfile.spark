@@ -1,0 +1,7 @@
+FROM spark:4.2.0-scala2.13-java21-python3-ubuntu
+
+USER root
+
+RUN python3 -m pip install --no-cache-dir python-dotenv
+
+USER spark

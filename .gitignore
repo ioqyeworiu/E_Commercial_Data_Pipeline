@@ -1,3 +1,11 @@
+docker_mount/clickhouse/data
+docker_mount/clickhouse/logs
+docker_mount/kafka_1/data
+docker_mount/postgresql
+docker_mount/spark_standalone/spark_history
+docker_mount/spark_standalone/spark_master
+docker_mount/spark_standalone/spark_worker*
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]

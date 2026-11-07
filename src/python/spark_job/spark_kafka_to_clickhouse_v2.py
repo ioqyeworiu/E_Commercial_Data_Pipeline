@@ -1,0 +1,172 @@
+from pyspark.sql import SparkSession
+from pyspark.sql import functions as F
+from pyspark.sql.types import StructType, StructField, StringType, ArrayType
+
+from spark_kafka_to_clickhouse_eval import CsvMetricsListener
+
+# ====== CẤU HÌNH (sửa cho khớp môi trường của bạn) ======
+KAFKA_BOOTSTRAP = "kafka-1:9092"
+KAFKA_TOPIC = "product_data_changes"
+CLICKHOUSE_URL = "jdbc:clickhouse://clickhouse-server:8123/ecommercial_warehouse"
+CLICKHOUSE_TABLE = "bronze"
+CLICKHOUSE_USER = "clickhouse"
+CLICKHOUSE_PASSWORD = "123456"  # phải là chuỗi
+CHECKPOINT_DIR = "/tmp/checkpoint/product_changes_v2"  # đổi checkpoint mới để đọc lại Kafka từ đầu
+
+# ====== BỘ LỌC NGÀNH THỜI TRANG ======
+# Từ khóa nhận diện ngành thời trang (so khớp trên category_tree, đã lower-case)
+FASHION_KEYWORDS = [
+    "thời trang",
+    # Quần áo (nữ, nam, trẻ em)
+    "quần", "áo", "váy", "đầm", "bộ đồ", "đồ lót", "đồ ngủ", "đồ bơi", "bikini", "đồ bộ",
+    "trang phục", "quần áo",
+    # Giày dép
+    "giày", "dép", "sandal", "guốc", "boot",
+    # Túi xách, ví, balo
+    "túi", "balo", "ba lô", "ví", "cặp", "vali",
+    # Phụ kiện thời trang
+    "phụ kiện thời trang", "kính", "mắt kính", "mũ", "nón", "khăn", "găng tay",
+    "thắt lưng", "dây nịt", "tất", "vớ", "cà vạt", "nơ",
+    # Đồng hồ, trang sức
+    "đồng hồ", "trang sức", "vòng", "nhẫn", "dây chuyền", "khuyên tai", "bông tai", "lắc tay",
+]
+
+# Từ khóa loại trừ (tránh nhầm với phụ kiện điện thoại, đồng hồ thông minh...)
+EXCLUDE_KEYWORDS = [
+    "điện thoại", "máy tính", "laptop", "máy ảnh", "tai nghe", "sạc", "ốp lưng",
+    "smartwatch", "đồng hồ treo tường", "đồng hồ để bàn",
+    "ô tô", "xe máy", "xe đạp", "thú cưng", "nhà cửa", "nhà bếp", "đồ chơi",
+    "máy giặt", "tủ lạnh", "thực phẩm", "túi lọc", "túi rác", "túi nilon",
+]
+
+
+def build_regex(keywords):
+    """Khớp nguyên từ: 'tất' không khớp 'tất cả' hay 'nơ' không khớp trong từ dài hơn."""
+    return r"(?<!\p{L})(" + "|".join(keywords) + r")(?!\p{L})"
+
+
+FASHION_REGEX = build_regex(FASHION_KEYWORDS)
+EXCLUDE_REGEX = build_regex(EXCLUDE_KEYWORDS)
+
+spark = SparkSession.builder.appName("kafka_to_clickhouse_v2").getOrCreate()
+# Đăng ký Listener
+csv_path = "/opt/spark/metrics/streaming_metrics.csv"
+spark.streams.addListener(CsvMetricsListener(csv_path))
+
+spark.sparkContext.setLogLevel("WARN")
+
+# ====== 1. ĐỌC TỪ KAFKA ======
+raw = (
+    spark.readStream.format("kafka")
+    .option("kafka.bootstrap.servers", KAFKA_BOOTSTRAP)
+    .option("subscribe", KAFKA_TOPIC)
+    .option("startingOffsets", "earliest")
+    .option("failOnDataLoss", "false")
+    .load()
+)
+
+# ====== 2. PARSE JSON ======
+# Mỗi message là 1 MẢNG [{...}]. Cho mọi cột là String rồi tự ép kiểu.
+# Không khai báo additionalInfo => tự động bị bỏ.
+item_schema = StructType([
+    StructField("urlId", StringType()),
+    StructField("title", StringType()),
+    StructField("brand", StringType()),
+    StructField("price", StringType()),
+    StructField("discount", StringType()),
+    StructField("sellPrice", StringType()),
+    StructField("sold", StringType()),
+    StructField("productRate", StringType()),
+    StructField("productRateCount", StringType()),
+    StructField("categoryTree", StringType()),
+    StructField("brandOrigin", StringType()),
+    StructField("madeIn", StringType()),
+    StructField("warranty", StringType()),
+    StructField("description", StringType()),
+    StructField("seller", StringType()),
+    StructField("sellerRate", StringType()),
+    StructField("sellerRateCount", StringType()),
+])
+
+parsed = (
+    raw.select(
+        F.from_json(F.col("value").cast("string"), ArrayType(item_schema)).alias("arr"),
+        "timestamp",
+    )
+    .select(F.explode("arr").alias("d"), "timestamp")  # mảng -> mỗi phần tử 1 dòng
+    .select("d.*", "timestamp")
+)
+
+# ====== 3. TIỀN XỬ LÝ ======
+def tc(col, dtype):
+    """try_cast: sai kiểu thì ra NULL (không báo lỗi)."""
+    return F.expr(f"try_cast({col} as {dtype})")
+
+
+def txt(col):
+    """Chuỗi: bỏ khoảng trắng 2 đầu, NULL -> chuỗi rỗng."""
+    return F.coalesce(F.trim(F.col(col)), F.lit(""))
+
+
+# "153 đánh giá" -> 153 ; "1.4k+ đánh giá" -> 1400
+rate_num = F.regexp_extract("sellerRateCount", r"([0-9]+\.?[0-9]*)", 1).cast("double")
+rate_mul = F.when(F.col("sellerRateCount").rlike(r"(?i)[0-9]\s*k"), 1000).otherwise(1)
+
+categories = F.split(F.coalesce(F.col("categoryTree"), F.lit("")), r"\s>\s")
+
+clean = (
+    parsed.select(
+        tc("urlId", "bigint").alias("url_id"),
+        txt("title").alias("title"),
+        txt("brand").alias("brand"),
+        tc("price", "double").alias("price"),                 # được phép NULL
+        tc("discount", "float").alias("discount"),
+        tc("sellPrice", "double").alias("sell_price"),
+        tc("sold", "int").alias("sold"),
+        tc("productRate", "float").alias("product_rate"),     # được phép NULL
+        tc("productRateCount", "int").alias("product_rate_count"),
+        txt("categoryTree").alias("category_tree"),
+        categories[0].alias("category_lv1"),
+        F.element_at(categories, -1).alias("category_leaf"),
+        txt("brandOrigin").alias("brand_origin"),
+        txt("madeIn").alias("made_in"),
+        txt("warranty").alias("warranty"),
+        txt("description").alias("description"),
+        txt("seller").alias("seller"),
+        tc("sellerRate", "float").alias("seller_rate"),
+        (rate_num * rate_mul).cast("int").alias("seller_rate_count"),
+        F.col("timestamp").alias("timestamp"),
+    )
+    # Cột BẮT BUỘC: sai kiểu / thiếu => bỏ dòng
+    .dropna(subset=["url_id", "sell_price", "sold", "discount"])
+    # Giá trị vô lý => bỏ dòng
+    .filter((F.col("sell_price") > 0) & (F.col("sold") >= 0) & (F.col("title") != ""))
+    # >>> CHỈ GIỮ NGÀNH THỜI TRANG (lọc trên category_tree, không lọc trên title) <<<
+    .filter(
+        F.lower(F.col("category_tree")).rlike(FASHION_REGEX)
+        & ~F.lower(F.col("category_tree")).rlike(EXCLUDE_REGEX)
+    )
+)
+
+# ====== 4. GHI VÀO CLICKHOUSE ======
+def write_to_clickhouse(batch_df, batch_id):
+    (
+        batch_df.write.format("jdbc")
+        .option("url", CLICKHOUSE_URL)
+        .option("driver", "com.clickhouse.jdbc.ClickHouseDriver")
+        .option("dbtable", CLICKHOUSE_TABLE)
+        .option("user", CLICKHOUSE_USER)
+        .option("password", CLICKHOUSE_PASSWORD)
+        .mode("append")
+        .save()
+    )
+
+
+query = (
+    clean.writeStream
+    .foreachBatch(write_to_clickhouse)
+    .option("checkpointLocation", CHECKPOINT_DIR)
+    .trigger(processingTime="10 seconds")
+    .start()
+)
+query.awaitTermination()
