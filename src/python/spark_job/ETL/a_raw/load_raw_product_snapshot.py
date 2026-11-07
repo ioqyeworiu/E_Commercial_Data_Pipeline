@@ -9,6 +9,8 @@ CLICKHOUSE_TABLE = "raw_product_snapshot"
 CLICKHOUSE_USER = "clickhouse"
 CLICKHOUSE_PASSWORD = "123456"
 
+idempotency_cols = ["url_id", "observed_at"]
+
 spark = SparkSession.builder.appName("Load Raw Product Snapshot").getOrCreate()
 spark.streams.addListener(CSVStreamingQueryListener("/opt/spark/metrics/load_raw_product_snapshot_metrics.csv"))
 
@@ -51,27 +53,28 @@ records = records_df.select(F.from_json("message", product_snapshot_schema).alia
     .withColumn("ingestion_time", F.current_timestamp())
 
 saved_records = records.select(
-    records.urlId.alias("url_id"),
-    records.title.alias("title"),
-    records.brand.alias("brand"),
-    records.price.alias("price"),
-    records.discount.alias("discount"),
-    records.sellPrice.alias("sell_price"),
-    records.sold.alias("sold"),
-    records.productRate.alias("product_rate"),
-    records.productRateCount.alias("product_rate_cnt"),
-    records.categoryTree.alias("category_tree"),
-    records.brandOrigin.alias("brand_origin"),
-    records.madeIn.alias("made_in"),
-    records.warranty.alias("warranty"),
-    records.description.alias("description"),
-    records.seller.alias("seller"),
-    records.sellerRate.alias("seller_rate"),
-    records.sellerRateCount.alias("seller_rate_cnt"),
-    records.additionalInfo.alias("additional_info"),
-    records.observed_at.alias("observed_at"),
+    F.trim(records.urlId).alias("url_id"),
+    F.trim(records.title).alias("title"),
+    F.trim(records.brand).alias("brand"),
+    F.trim(records.price).alias("price"),
+    F.trim(records.discount).alias("discount"),
+    F.trim(records.sellPrice).alias("sell_price"),
+    F.trim(records.sold).alias("sold"),
+    F.trim(records.productRate).alias("product_rate"),
+    F.trim(records.productRateCount).alias("product_rate_cnt"),
+    F.trim(records.categoryTree).alias("category_tree"),
+    F.trim(records.brandOrigin).alias("brand_origin"),
+    F.trim(records.madeIn).alias("made_in"),
+    F.trim(records.warranty).alias("warranty"),
+    F.trim(records.description).alias("description"),
+    F.trim(records.seller).alias("seller"),
+    F.trim(records.sellerRate).alias("seller_rate"),
+    F.trim(records.sellerRateCount).alias("seller_rate_cnt"),
+    F.trim(records.additionalInfo).alias("additional_info"),
+    F.trim(records.observed_at).alias("observed_at"),
     records.ingestion_time.alias("ingested_at"),
-) 
+) .withColumn("idempotency_key", F.sha2(F.concat_ws("\u0001", *[F.coalesce(F.col(c), F.lit("<NULL>")) for c in idempotency_cols]), 256)) \
+.dropDuplicates(["idempotency_key"])
 
 def write_to_clickhouse(batch_df, batch_id):
     (
@@ -81,6 +84,7 @@ def write_to_clickhouse(batch_df, batch_id):
         .option("dbtable", CLICKHOUSE_TABLE)
         .option("user", CLICKHOUSE_USER)
         .option("password", CLICKHOUSE_PASSWORD)
+        .option("batchsize", 50000)
         .mode("append")
         .save()
     )

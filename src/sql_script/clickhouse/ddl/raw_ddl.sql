@@ -18,10 +18,11 @@ CREATE TABLE raw_product_snapshot(
     seller_rate_cnt String,
     additional_info String,
     observed_at String,
-    ingested_at DATETIME
+    ingested_at DATETIME('Asia/Ho_Chi_Minh'),
+    idempotency_key String
 )
 ENGINE MergeTree
-PARTITION BY ingested_at
+PARTITION BY toDate(ingested_at)
 ORDER BY (url_id, observed_at);
 
 
@@ -40,8 +41,9 @@ CREATE TABLE raw_user_review(
     use_time String,
     prod_properties String,
     observed_at String,
-    ingested_at DATETIME
+    ingested_at DATETIME('Asia/Ho_Chi_Minh'),
+    idempotency_key String
 )
 ENGINE MergeTree
-PARTITION BY ingested_at
+PARTITION BY toDate(ingested_at)
 ORDER BY (url_id, observed_at);

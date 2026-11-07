@@ -5,10 +5,10 @@ CREATE TABLE silver_product(
     made_in String,
     warranty String,
     description String,
-    valid_from DATETIME DEFAULT now(),
-    valid_to DATETIME DEFAULT NULL,
+    valid_from DATETIME('Asia/Ho_Chi_Minh') DEFAULT now(),
+    valid_to DATETIME('Asia/Ho_Chi_Minh') DEFAULT NULL,
     is_current BOOLEAN DEFAULT TRUE,
-    ingested_at DATETIME
+    ingested_at DATETIME('Asia/Ho_Chi_Minh')
 )
 ENGINE MergeTree
 Order By (title);
@@ -20,10 +20,10 @@ CREATE TABLE silver_category(
     title String,
     up_category_sk UInt64,
     level Int32,
-    valid_from DATETIME DEFAULT now(),
-    valid_to DATETIME DEFAULT NULL,
+    valid_from DATETIME('Asia/Ho_Chi_Minh') DEFAULT now(),
+    valid_to DATETIME('Asia/Ho_Chi_Minh') DEFAULT NULL,
     is_current BOOLEAN DEFAULT TRUE,
-    ingested_at DATETIME
+    ingested_at DATETIME('Asia/Ho_Chi_Minh')
 )
 ENGINE MergeTree
 ORDER BY (title);
@@ -34,10 +34,10 @@ CREATE TABLE silver_brand(
     brand_sk UInt64,
     title String,
     brand_origin String,
-    valid_from DATETIME DEFAULT now(),
-    valid_to DATETIME DEFAULT NULL,
+    valid_from DATETIME('Asia/Ho_Chi_Minh') DEFAULT now(),
+    valid_to DATETIME('Asia/Ho_Chi_Minh') DEFAULT NULL,
     is_current BOOLEAN DEFAULT TRUE,
-    ingested_at DATETIME
+    ingested_at DATETIME('Asia/Ho_Chi_Minh')
 )
 ENGINE MergeTree
 ORDER BY (title);
@@ -49,10 +49,10 @@ CREATE TABLE silver_seller(
     name String,
     seller_rate Float32,
     seller_rate_cnt Int64,
-    valid_from DATETIME DEFAULT now(),
-    valid_to DATETIME DEFAULT NULL,
+    valid_from DATETIME('Asia/Ho_Chi_Minh') DEFAULT now(),
+    valid_to DATETIME('Asia/Ho_Chi_Minh') DEFAULT NULL,
     is_current BOOLEAN DEFAULT TRUE,
-    ingested_at DATETIME
+    ingested_at DATETIME('Asia/Ho_Chi_Minh')
 )
 ENGINE MergeTree
 ORDER BY (name);
@@ -69,9 +69,10 @@ CREATE TABLE silver_snapshot(
     sold Int32,
     product_rate Float32,
     product_rate_cnt Int32,
-    observed_at DATETIME,
-    ingested_at DATETIME
+    observed_at DATETIME('Asia/Ho_Chi_Minh'),
+    ingested_at DATETIME('Asia/Ho_Chi_Minh'),
+    idempotency_key String
 )
 ENGINE MergeTree
-PARTITION BY observed_at
+PARTITION BY toDate(ingested_at)
 ORDER BY (observed_at);

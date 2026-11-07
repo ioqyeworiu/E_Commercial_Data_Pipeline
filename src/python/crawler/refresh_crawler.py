@@ -39,7 +39,7 @@ METRIC_FIELDS = ["url_id", "crawling_start_at", "observed_at", "crawling_end_at"
 def create_kafka_producer() -> Producer:
     return Producer({
         "bootstrap.servers": "kafka-1:9092",
-        "client.id": f"refresh-crawler-{os.getpid()}-{uuid4().hex[:8]}",
+        "client.id": f"refresh-crawler-{os.getpid()}-{uuid4().hex[:8]}",    
         "acks": "all",
         "enable.idempotence": True,
         "linger.ms": 10,
@@ -235,7 +235,7 @@ class RefreshCrawler(BaseCrawler):
                     # print(f"Brand: {brand}" if not brand else f"brand: {brand} - ok")
 
                 # product price
-                price = soup.select_one("div[product-price__original-price]")
+                price = soup.select_one("div[class='product-price__original-price']")
                 if price: 
                     price = price.get_text(strip=True)
                     price = price.replace(".", "").replace(",", "")
@@ -245,11 +245,8 @@ class RefreshCrawler(BaseCrawler):
                 discount = soup.select_one("div[class='product-price__discount-rate']")
                 if discount:
                     discount = discount.get_text(strip=True)
-                    discount = discount[1:-1]
                     # print(f"Discount: {discount}" if not discount else f"discount: {discount} - ok")
                     # discount = float(discount)
-                else:
-                    discount = 0.0
                 
                 # product sell price
                 sellPrice = soup.select_one("div[class='product-price__current-price']")
@@ -325,15 +322,14 @@ class RefreshCrawler(BaseCrawler):
                     # print(f"Seller: {seller}" if not seller else f"seller: {seller} - ok")
 
                 # seller rate and seller rate count
-                sr_text = soup.select_one('div[class="item review"]')
-                sr_text = sr_text.get_text(strip=True).lower() if sr_text else None
-                sellerRate = None
-                sellerRateCount = None
+                sr_element = soup.select_one('div[class="item review"]')
+                sr_text = sr_element.get_text(strip=True).lower() if sr_element else None
+                sellerRate = "Chưa có đánh giá"
+                sellerRateCount = "Chưa có đánh giá"
                 # print(f"Seller Rate Text: {sr_text}")
                 if sr_text and not sr_text.__contains__("chưa có đánh giá"):
-                    sellerRateCount = sr_text[4:].replace("(", "").replace(")", "").strip() if len(sr_text) > 4 else None
-                    sellerRate = sr_text[:3]
-                    sellerRate = float(sellerRate) if sellerRate else None
+                    sellerRate = sr_element.select_one('span').get_text(strip=True)
+                    sellerRateCount = sr_element.select_one('div[class="sub-title"]').get_text(strip=True)
                 # print(f"Seller Rate: {sellerRate}, Seller Rate Count: {sellerRateCount}" if not sellerRate or not sellerRateCount else f"seller rate: {sellerRate} - {sellerRateCount} - ok")
                 record = {
                     "urlId": url_id,

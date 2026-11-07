@@ -9,6 +9,8 @@ CLICKHOUSE_TABLE = "raw_user_review"
 CLICKHOUSE_USER = "clickhouse"
 CLICKHOUSE_PASSWORD = "123456"
 
+idempotency_cols = ["url_id", "observed_at"]
+
 user_review_schema = StructType([
     StructField("user_name", StringType(), True),
     StructField("joined_duration", StringType(), True),
@@ -40,21 +42,22 @@ parsed_df = df.select("key", F.from_json("value", user_review_schema).alias("val
     .withColumn("ingestion_time", F.current_timestamp())
 
 saved_df = parsed_df.select(
-    parsed_df.key.alias("url_id"),
-    parsed_df.user_name.alias("user_name"),
-    parsed_df.joined_duration.alias("joined_duration"),
-    F.col("Đã viết").alias("reviewed"),
-    F.col("Đã nhận").alias("thank_received"),
-    parsed_df.star_score.alias("star_score"),
-    parsed_df.status.alias("status"),
-    parsed_df.comment.alias("comment"),
-    parsed_df.images_urls.alias("images_urls"),
-    parsed_df.rate_time.alias("rated_at"),
-    parsed_df.use_time.alias("use_time"),
-    parsed_df.prod_properties.alias("prod_properties"),
-    parsed_df.observed_at.alias("observed_at"),
+    F.trim(parsed_df.key).alias("url_id"),
+    F.trim(parsed_df.user_name).alias("user_name"),
+    F.trim(parsed_df.joined_duration).alias("joined_duration"),
+    F.trim(F.col("Đã viết")).alias("reviewed"),
+    F.trim(F.col("Đã nhận")).alias("thank_received"),
+    F.trim(parsed_df.star_score).alias("star_score"),
+    F.trim(parsed_df.status).alias("status"),
+    F.trim(parsed_df.comment).alias("comment"),
+    F.trim(parsed_df.images_urls).alias("images_urls"),
+    F.trim(parsed_df.rate_time).alias("rated_at"),
+    F.trim(parsed_df.use_time).alias("use_time"),
+    F.trim(parsed_df.prod_properties).alias("prod_properties"),
+    F.trim(parsed_df.observed_at).alias("observed_at"),
     parsed_df.ingestion_time.alias("ingested_at"),
-)
+).withColumn("idempotency_key", F.sha2(F.concat_ws("\u0001", *[F.coalesce(F.col(c), F.lit("<NULL>")) for c in idempotency_cols]), 256)) \
+.dropDuplicates(["idempotency_key"])
 
 def write_to_clickhouse(batch_df, batch_id):
     (
@@ -64,6 +67,7 @@ def write_to_clickhouse(batch_df, batch_id):
         .option("dbtable", CLICKHOUSE_TABLE)
         .option("user", CLICKHOUSE_USER)
         .option("password", CLICKHOUSE_PASSWORD)
+        .option("batchsize", 50000)
         .mode("append")
         .save()
     )

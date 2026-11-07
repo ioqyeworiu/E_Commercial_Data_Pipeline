@@ -17,21 +17,13 @@ CREATE TABLE bronze_product_snapshot(
     seller_rate float,
     seller_rate_cnt int,
     additional_info String,
-    observed_at DATETIME,
-    ingested_at DATETIME
+    observed_at DATETIME('Asia/Ho_Chi_Minh'),
+    ingested_at DATETIME('Asia/Ho_Chi_Minh'),
+    idempotency String
 )
 ENGINE MergeTree
-PARTITION BY ingested_at
+PARTITION BY toDate(ingested_at)
 ORDER BY (url_id, observed_at);
-
-SHOW CREATE TABLE bronze_product_snapshot;
-
--- DROP TABLE bronze
---
--- SYSTEM RELOAD CONFIG;
---
--- RESTORE DATABASE ecommercial_warehouse
--- FROM Disk('backups', 'backup_2026.zip');
 
 
 CREATE TABLE bronze_user_review(
@@ -47,9 +39,10 @@ CREATE TABLE bronze_user_review(
     rated_at float, --đơn vị là giờ
     use_time float, --đơn vị là giờ
     prod_properties String,
-    observed_at String,
-    ingested_at DATETIME
+    observed_at DATETIME('Asia/Ho_Chi_Minh'),
+    ingested_at DATETIME('Asia/Ho_Chi_Minh'),
+    idempotency_key String
 )
 ENGINE MergeTree
-PARTITION BY ingested_at
+PARTITION BY toDate(ingested_at)
 ORDER BY (url_id, observed_at);
