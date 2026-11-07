@@ -3,7 +3,7 @@ import pyspark.sql.functions as F
 from preprocessing_func.review_snapshot_norm import *
 
 CLICKHOUSE_URL = "jdbc:clickhouse://clickhouse-server:8123/ecommercial_warehouse"
-CLICKHOUSE_RAW_TABLE = "raw_uesr_review"
+CLICKHOUSE_RAW_TABLE = "raw_user_review"
 CLICKHOUSE_BRONZE_TABLE = "bronze_user_review"
 CLICKHOUSE_USER = "clickhouse"
 CLICKHOUSE_PASSWORD = "123456"
@@ -21,20 +21,22 @@ raw_user_review_df = (
 )
 
 saved_df = raw_user_review_df.select(
-    F.lower(raw_user_review_df.key).alias("url_id").cast("int"),
+    F.lower(raw_user_review_df.idempotency_key).alias("idempotency_key").cast("string"),
+    F.lower(raw_user_review_df.url_id).alias("url_id").cast("int"),
     F.lower(raw_user_review_df.user_name).alias("user_name").cast("string"),
     to_hours(raw_user_review_df.joined_duration).alias("joined_duration").cast("float"),
-    parse_count(raw_user_review_df.wrote).alias("reviewed").cast("int"),
-    parse_count(raw_user_review_df.received).alias("thank_received").cast("int"),
+    parse_count(raw_user_review_df.reviewed).alias("reviewed").cast("int"),
+    parse_count(raw_user_review_df.thank_received).alias("thank_received").cast("int"),
     parse_star_score(raw_user_review_df.star_score).alias("star_score").cast("float"),
     F.lower(raw_user_review_df.status).alias("status").cast("string"),
     clean_comment(raw_user_review_df.comment).alias("comment").cast("string"),
     F.lower(raw_user_review_df.images_urls).alias("images_urls").cast("string"),
-    to_hours(raw_user_review_df.rate_time).alias("rate_at").cast("float"),
+    to_hours(raw_user_review_df.rated_at).alias("rated_at").cast("float"),
     to_hours(raw_user_review_df.use_time).alias("use_time").cast("float"),
     clean_prod_properties(raw_user_review_df.prod_properties).alias("prod_properties").cast("string"),
     raw_user_review_df.observed_at.alias("observed_at").cast("timestamp")
-).withColumn("ingested_at", F.current_timestamp())
+).withColumn("ingested_at", F.current_timestamp()) \
+.dropDuplicates(["idempotency_key"])
 
 saved_df.write.format("jdbc") \
 .option("url", CLICKHOUSE_URL) \

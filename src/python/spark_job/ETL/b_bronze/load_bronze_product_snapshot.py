@@ -21,6 +21,7 @@ raw_product_snapshot_df = (
 )
 
 bronze_product_snapshot_df = raw_product_snapshot_df.select(
+    F.lower(raw_product_snapshot_df.idempotency_key).alias("idempotency_key").cast("string"),
     F.lower(raw_product_snapshot_df.url_id).alias("url_id").cast("int"),
     normalize_title(raw_product_snapshot_df.title, lower=True).alias("title").cast("string"),
     F.lower(raw_product_snapshot_df.brand).alias("brand").cast("string"),
@@ -40,8 +41,8 @@ bronze_product_snapshot_df = raw_product_snapshot_df.select(
     normalize_rating_count(raw_product_snapshot_df.seller_rate_cnt).alias("seller_rate_cnt").cast("int"),
     F.lower(raw_product_snapshot_df.additional_info).alias("additional_info").cast("string"),
     raw_product_snapshot_df.observed_at.alias("observed_at").cast("timestamp"),
-).withColumn("ingested_at", F.current_timestamp())
-
+).withColumn("ingested_at", F.current_timestamp()) \
+.dropDuplicates(["idempotency_key"])
 
 bronze_product_snapshot_df.write.format("jdbc") \
     .option("url", CLICKHOUSE_URL) \
