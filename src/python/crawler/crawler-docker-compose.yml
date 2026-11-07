@@ -1,0 +1,40 @@
+services:
+  discovery-crawler-1:
+    image: discovery-crawler-selenium
+    build:
+      context: .
+      dockerfile: discovery_crawler.dockerfile
+    container_name: discovery_crawler  
+    shm_size: "2gb"
+    mem_limit: 2g
+    env_file: discovery_crawler.env 
+    environment:
+      SEED_URL: "https://tiki.vn/trung-nguyen-legend-ca-phe-g7-hoa-tan-den-hop-15-goi-x-2gr-p74245802.html"
+ 
+  refresh-crawler-1:
+    build:
+      context: .
+      dockerfile: refresh_crawler.dockerfile
+    image: refresh-crawler-selenium
+    container_name: refresh_crawler_1
+    shm_size: "2gb"         
+    env_file: refresh_crawler.env
+    mem_limit: 4g
+    cpus: 3
+    volumes:
+      - ./metrics:/app/metrics
+    restart: unless-stopped          
+
+  comment-crawler-1:
+    build:
+      context: .
+      dockerfile: comment_crawler.dockerfile
+    image: comment-crawler-selenium
+    container_name: comment_crawler_1
+    shm_size: "2gb"        
+    mem_limit: 2.5g           
+    cpus: 2
+    env_file: comment_crawler.env
+    volumes:
+      - ./metrics:/app/metrics
+    restart: unless-stopped

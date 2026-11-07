@@ -23,22 +23,30 @@ zone_info = ZoneInfo("Asia/Ho_Chi_Minh")
 
 CACHE_CLEAR_INTERVAL = 25         # cứ mỗi 25 URL thì dọn cache (nếu chưa tới lúc restart)
 RESTART_INTERVAL = 200             # cứ mỗi 50 URL thì restart driver, bất kể RAM
-MAX_DRIVER_MEMORY_MB = 2000       # hoặc RAM vượt ngưỡng này thì restart sớm hơn
+MAX_DRIVER_MEMORY_MB = 1200       # hoặc RAM vượt ngưỡng này thì restart sớm hơn
 DEFAULT_BATCH_SIZE = 500
 EMPTY_BATCH_SLEEP = 3             # nghỉ khi không còn URL nào cần crawl
 POLL_INTERVAL = 0.1               # timeout cho producer.poll() trong poll thread
-KAFKA_TOPIC = 'product_data_changes'
+
+KAFKA_BROKER = os.getenv("KAFKA_BROKER") #kafka-1:9092
+KAFKA_TOPIC = os.getenv("KAFKA_TOPIC")  #product_data_changes
+
+POSTGRES_URL = os.getenv("POSTGRES_URL")
+
+DRIVER_PATH = os.getenv("DRIVER_PATH")
+USER_PROFILE_DIR = os.getenv("USER_PROFILE_DIR")
+USER_AGENT = os.getenv("USER_AGENT") 
 
 MAX_RESIZE_ITERATIONS = 6      # tránh resize vô hạn nếu trang lỗi/vô cực
 RESIZE_BUFFER_PX = 300         # dư ra để chắc chắn phần cuối trang cũng "nhìn thấy"
 DEFAULT_WINDOW_HEIGHT = 1080   # kích thước mặc định, quay lại sau khi crawl xong
 
-REFRESH_CRAWLER_METRIC_FILE = "evidence/w06/refresh_crawler_metric.csv"
+REFRESH_CRAWLER_METRIC_FILE = os.getenv("REFRESH_CRAWLER_METRIC_FILE", "/app/metrics/refresh_crawler_metrics.csv")
 METRIC_FIELDS = ["url_id", "crawling_start_at", "observed_at", "crawling_end_at", "produced_at", "kafka_received_at", "kafka_partition", "kafka_offset", "error_message"]
 
 def create_kafka_producer() -> Producer:
     return Producer({
-        "bootstrap.servers": "kafka-1:9092",
+        "bootstrap.servers": KAFKA_BROKER,
         "client.id": f"refresh-crawler-{os.getpid()}-{uuid4().hex[:8]}",    
         "acks": "all",
         "enable.idempotence": True,
@@ -458,18 +466,18 @@ class RefreshCrawler(BaseCrawler):
                 logger.warning("remaining %d not sent", remaining)
 
 def run_refresh_crawler(batch_size, profile_name, metric_writer_lock):
-    db_engine = create_engine(os.getenv("POSTGRES_URL"), pool_pre_ping=True)
+    db_engine = create_engine(POSTGRES_URL, pool_pre_ping=True)
     kafka_producer = create_kafka_producer()
     crawler = RefreshCrawler(
         metric_writer_lock=metric_writer_lock,
         kafka_producer=kafka_producer,
         db_engine=db_engine,
         headless=True,
-        driver_path=r"C:\Users\pmqua\Downloads\edgedriver_win64\msedgedriver.exe",
-        user_data_dir=r"C:\Users\pmqua\Downloads\selenium_user_data",
+        driver_path=DRIVER_PATH,
+        user_data_dir=USER_PROFILE_DIR,
         cleanup_user_data_dir=True,
         profile_name=profile_name,
-        user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Edge/91.0.864.37"
+        user_agent=USER_AGENT
     )
     crawler.start()
     try:
@@ -482,21 +490,21 @@ if __name__ == "__main__":
     
     p1 = Process(target=run_refresh_crawler, args=(DEFAULT_BATCH_SIZE, "refresh1", metric_writer_lock))
     p2 = Process(target=run_refresh_crawler, args=(DEFAULT_BATCH_SIZE, "refresh2", metric_writer_lock))
-    p3 = Process(target=run_refresh_crawler, args=(DEFAULT_BATCH_SIZE, "refresh3", metric_writer_lock))
+    # p3 = Process(target=run_refresh_crawler, args=(DEFAULT_BATCH_SIZE, "refresh3", metric_writer_lock))
     # p4 = Process(target=run_refresh_crawler, args=(DEFAULT_BATCH_SIZE, "refresh4"))
 
     p1.start()
     p2.start()
-    p3.start()
+    # p3.start()
     # p4.start()
     try:
         p1.join()
         p2.join()
-        p3.join()
+        # p3.join()
         # p4.join()
     except KeyboardInterrupt:
         logger.info("Main process interrupted, waiting for children to shut down...")
         p1.join()
         p2.join()
-        p3.join()
+        # p3.join()
         # p4.join()

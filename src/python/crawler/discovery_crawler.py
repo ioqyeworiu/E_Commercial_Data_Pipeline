@@ -19,9 +19,18 @@ BATCH_SIZE = 20
 BATCH_TIMEOUT = 2.0
 CLEAR_CACHE_EVERY_N_PAGES = 20
 RESTART_DRIVER_EVERY_N_PAGES = 200      # restart cứng theo số trang
-RESTART_DRIVER_RAM_MB = 2500            # hoặc restart sớm hơn nếu RAM vượt ngưỡng
-KEYWORDS = ["váy", "áo", "quần", "giày", "túi", "mũ", "phụ kiện", "đầm", "sandal", "balo", "thắt lưng", "kính", "mũ", "dép", "tất", "nam", "nữ"]
-NOTCONTAIN_KEYWORDS = ["giặt", "xả", "rửa", "tẩy", "là", "che", "phủ"]
+RESTART_DRIVER_RAM_MB = 1500            # hoặc restart sớm hơn nếu RAM vượt ngưỡng
+# KEYWORDS = ["váy", "áo", "quần", "giày", "túi", "mũ", "phụ kiện", "đầm", "sandal", "balo", "thắt lưng", "kính", "mũ", "dép", "tất", "nam", "nữ"]
+# NOTCONTAIN_KEYWORDS = ["giặt", "xả", "rửa", "tẩy", "là", "che", "phủ"]
+
+SEED_URL = os.getenv("SEED_URL")
+DRIVER_PATH = os.getenv("DRIVER_PATH")
+USER_PROFILE_DIR = os.getenv("USER_PROFILE_DIR")
+POSTGRES_URL = os.getenv("POSTGRES_URL")
+CLEANUP_USER_DATA_DIR = True if os.getenv("CLEANUP_USER_DATA_DIR") == "true" else False
+HEADLESS = True if os.getenv("HEADLESS") == "true" else False
+PROFILE_NAME = os.getenv("PROFILE_NAME")
+USER_AGENT = os.getenv("USER_AGENT") 
 
 def standalize_url(url: str):
     return url.split("?")[0]
@@ -64,21 +73,21 @@ def producer_crawl(crawler: BaseCrawler, url_seed: str, url_queue: queue.Queue, 
         sleep(0.5)
         crawler.driver.execute_script("window.scrollBy(0, 900);")
         sleep(0.5)
-        # other_urls_elements = crawler.driver.find_elements(By.XPATH, "//a[contains(@class, 'product-item')]")
-        # other_urls = [el.get_attribute("href") for el in other_urls_elements]
+        other_urls_elements = crawler.driver.find_elements(By.XPATH, "//a[contains(@class, 'product-item')]")
+        other_urls = [el.get_attribute("href") for el in other_urls_elements]
 
-        other_urls = []
-        product_elements_div = crawler.driver.find_elements(By.XPATH, "//div[contains(@class, 'sc-a007ec24-0 hVGhMI')]")
-        if not product_elements_div:
-            continue
-        product_elements = product_elements_div[0].find_elements(By.XPATH, ".//div[contains(@class, 'sc-e6fb8ae7-1 kTzRAo')]")
-        for product_ele in product_elements:
-            product_title = product_ele.find_element(By.XPATH, ".//h3[contains(@class, 'sc-8b415d9d-5 izNpeL')]").text.strip().lower()
-            if not product_title:
-                product_title = product_ele.find_element(By.XPATH, ".//img[contains(@class, 'sc-900210d0-0 hFEtiz')]").get_attribute("alt").strip().lower()
-            if any(keyword in product_title for keyword in KEYWORDS):
-                product_url_ele = product_ele.find_element(By.XPATH, ".//a[contains(@class, 'product-item')]")
-                other_urls.append(product_url_ele.get_attribute("href"))
+        # other_urls = []
+        # product_elements_div = crawler.driver.find_elements(By.XPATH, "//div[contains(@class, 'sc-a007ec24-0 hVGhMI')]")
+        # if not product_elements_div:
+        #     continue
+        # product_elements = product_elements_div[0].find_elements(By.XPATH, ".//div[contains(@class, 'sc-e6fb8ae7-1 kTzRAo')]")
+        # for product_ele in product_elements:
+        #     product_title = product_ele.find_element(By.XPATH, ".//h3[contains(@class, 'sc-8b415d9d-5 izNpeL')]").text.strip().lower()
+        #     if not product_title:
+        #         product_title = product_ele.find_element(By.XPATH, ".//img[contains(@class, 'sc-900210d0-0 hFEtiz')]").get_attribute("alt").strip().lower()
+        #     if any(keyword in product_title for keyword in KEYWORDS):
+        #         product_url_ele = product_ele.find_element(By.XPATH, ".//a[contains(@class, 'product-item')]")
+        #         other_urls.append(product_url_ele.get_attribute("href"))
         ### có thể thêm phần "khám phá thêm" ở đây
 
         for href in other_urls:
@@ -190,7 +199,7 @@ def _flush_batch(engine, batch, worker_id):
 class DiscoveryCrawler(BaseCrawler):
     def run(self, *args) -> None:
         url_seed = standalize_url(args[0])
-        engine = create_engine(os.getenv("POSTGRES_URL"), pool_size=10, max_overflow=10, pool_timeout=10)
+        engine = create_engine(POSTGRES_URL, pool_size=10, max_overflow=10, pool_timeout=10)
 
         url_queue: queue.Queue = queue.Queue(maxsize=1000)
         db_queue: queue.Queue = queue.Queue(maxsize=1000)
@@ -211,26 +220,18 @@ class DiscoveryCrawler(BaseCrawler):
                 t.join(timeout=10)
 
 if __name__ == "__main__":
-    parser = ArgumentParser()
-    parser.add_argument("seed_url", help="The seed URL to start crawling from")
-    parser.add_argument("--driver-path", default=r"C:\Users\pmqua\Downloads\edgedriver_win64\msedgedriver.exe", help="Path to the Edge WebDriver executable")
-    parser.add_argument("--user-data-dir", default=r"C:\Users\pmqua\Downloads\selenium_user_data", help="Path to the user data directory for Selenium")
-    parser.add_argument("--cleanup-user-data-dir", action="store_true", help="Whether to clean up the user data directory after crawling")
-    parser.add_argument("--headless", action="store_true", help="Run the browser in headless mode")
-    parser.add_argument("--profile-name", default="discovery", help="Name of the browser profile to use for Selenium")
-    args = parser.parse_args()
-
     crawler = DiscoveryCrawler(
-        driver_path=args.driver_path,
-        user_data_dir=args.user_data_dir,
-        cleanup_user_data_dir=args.cleanup_user_data_dir,
-        headless=args.headless,
-        profile_name=args.profile_name
+        driver_path=DRIVER_PATH,
+        user_data_dir=USER_PROFILE_DIR,
+        cleanup_user_data_dir=CLEANUP_USER_DATA_DIR,
+        headless=HEADLESS,
+        profile_name=PROFILE_NAME,
+        user_agent=USER_AGENT
     )
     crawler.start()
     try:
         crawler.run(
-            args.seed_url
+            SEED_URL
         )
     finally:
         crawler.stop()
