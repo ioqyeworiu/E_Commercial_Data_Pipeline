@@ -1,0 +1,1479 @@
+{
+  "schema_version": "v2",
+  "source": "tiki_api",
+  "message_id": "aed5ce69-dfc7-467e-bcf5-0563827360ff",
+  "url_id": -1,
+  "url": "https://tiki.vn/tui-giu-mat-dung-com-hang-ngay-locknlock-hwb820grn-200-x-150-x-220mm-mau-xanh-la-khong-bao-gom-hop-thuy-tinh-p276177979.html",
+  "observed_at": "2026-11-14T20:46:40.637600+07:00",
+  "crawl_started_at": "2026-11-14T20:46:40.359577+07:00",
+  "crawl_finished_at": "2026-11-14T20:46:46.178267+07:00",
+  "ids": {
+    "product_id": 276177979,
+    "spid": 276177984,
+    "seller_id": 1,
+    "brand_id": 48077,
+    "leaf_category_id": 2514
+  },
+  "product": {
+    "product_id": 276177979,
+    "master_id": 276177979,
+    "spid": 276177984,
+    "sku": "8644893668314",
+    "name": "Túi giữ mát đựng cơm hằng ngày LocknLock",
+    "type": "configurable",
+    "url": "https://tiki.vn/tui-giu-mat-dung-com-hang-ngay-locknlock-hwb820grn-200-x-150-x-220mm-mau-xanh-la-khong-bao-gom-hop-thuy-tinh-p276177979.html?spid=276177984",
+    "short_url": "https://tiki.vn/product-p276177979.html?spid=276177984",
+    "brand_id": 48077,
+    "seller_id": 1,
+    "leaf_category_id": 2514,
+    "price": 197780,
+    "list_price": 341000,
+    "original_price": 341000,
+    "discount": 143220,
+    "discount_rate": 42,
+    "rating_average": 4.8,
+    "review_count": 23,
+    "favourite_count": 0,
+    "all_time_quantity_sold": 159,
+    "quantity_sold": 159,
+    "inventory_status": "available",
+    "inventory_type": "instock",
+    "fulfillment_type": "tiki_delivery",
+    "stock_qty": 1000,
+    "min_sale_qty": 1,
+    "max_sale_qty": 1000,
+    "day_ago_created": 786,
+    "data_version": 3300,
+    "short_description": "- Sử dụng khóa kéo giúp chiếc túi trở nên kín đáo và gọn gàng- Dễ dàng loại bỏ vết bẩn bên trong túi chỉ bằng khăn ướt- Giữ đồ bên trong tươi mới hơn nhờ lớp cách nhiệt- Tiện lợi để chứa muỗng đũa,...",
+    "description_html": "<p>- Sử dụng khóa kéo giúp chiếc túi trở nên kín đáo và gọn gàng</p>\n<p>- Dễ dàng loại bỏ vết bẩn bên trong túi chỉ bằng khăn ướt</p>\n<p>- Giữ đồ bên trong tươi mới hơn nhờ lớp cách nhiệt</p>\n<p>- Tiện lợi để chứa muỗng đũa, tăm hay khăn ướ</p>\n<p>- Túi có thiết kế và màu sắc đơn giản phù hợp với mọi hoàn cảnh</p>\n<p>- Có thể dùng để chứa đựng bất kỳ loại hộp đựng nào hay bất cứ thứ gì bạn cần</p>\n<p>- Các túi bên hông và sau giúp bạn cất giữ thẻ gửi xe, chìa khóa, bình nướ và lấy ra thật dễ dàng</p>\n<p>Chất liệu: Vỏ ngoài: 100% Polyester; Lớp cách nhiệt: 100% Polyethylene; Lớp lót trong: Polyester</p>\n<p><strong>Lưu ý</strong></p>\n<p>- Giặt túi bằng tay</p>\n<p>- Không dùng hóa chất tẩy.</p>\n<p>- Không vắt túi.</p>\n<p>- Không ủi.</p>\n<p>- Phơi túi trong bóng râm.</p>\n<p>- Vệ sinh túi với khăn ẩm hoặc bàn chải mềm.</p>\n<p>- Không vặn xoắn sản phẩm.</p>\n<p>- Không làm đổ nước vào túi vì nước sẽ rò rỉ qua đường may và rò rỉ ra ngoài.</p>\n<p>- Không để túi tiếp xúc với lửa và vất sắc nhọn.</p><p>Giá sản phẩm trên Tiki đã bao gồm thuế theo luật hiện hành. Bên cạnh đó, tuỳ vào loại sản phẩm, hình thức và địa chỉ giao hàng mà có thể phát sinh thêm chi phí khác như phí vận chuyển, phụ phí hàng cồng kềnh, thuế nhập khẩu (đối với đơn hàng giao từ nước ngoài có giá trị trên 1 triệu đồng).....</p>",
+    "thumbnail_url": "https://salt.tikicdn.com/cache/280x280/media/catalog/producttmp/d8/5d/47/3072968d1bddc48e290fca8ea31c4b5d.jpg",
+    "image_urls": [
+      "https://salt.tikicdn.com/media/catalog/producttmp/d8/5d/47/3072968d1bddc48e290fca8ea31c4b5d.jpg",
+      "https://salt.tikicdn.com/ts/product/88/9e/11/72ec970a9b2233ed8ae63b370b9c6c8a.jpg",
+      "https://salt.tikicdn.com/ts/product/6d/f8/0d/40b8ae653ec43414140b6caed0607d0b.jpg",
+      "https://salt.tikicdn.com/ts/product/c4/eb/a0/fa3a3f044a419598afe40739665fc21b.jpg",
+      "https://salt.tikicdn.com/ts/product/5a/07/d7/fb682f43232088b64743d62c4559bc22.jpg",
+      "https://salt.tikicdn.com/ts/product/bb/a1/c4/a7e3df0e955ef22ae7a9b61019a56413.jpg",
+      "https://salt.tikicdn.com/ts/product/b9/8e/ec/f9035689b949a0e2e99ac406c13be4f0.jpg",
+      "https://salt.tikicdn.com/ts/product/ee/47/1d/4314665ed287dfc5131191c77e673695.jpg"
+    ],
+    "specifications": [
+      {
+        "group": "Content",
+        "code": "brand",
+        "name": "Thương hiệu",
+        "value": "LocknLock"
+      },
+      {
+        "group": "Content",
+        "code": "brand_country",
+        "name": "Xuất xứ thương hiệu",
+        "value": "Hàn Quốc"
+      },
+      {
+        "group": "Content",
+        "code": "chat_lieu",
+        "name": "Chất liệu",
+        "value": "Vỏ ngoài: 100% Polyester; Lớp cách nhiệt: 100% Polyethylene; Lớp lót trong: Polyester"
+      },
+      {
+        "group": "Content",
+        "code": "origin",
+        "name": "Xuất xứ (Made in)",
+        "value": "Trung Quốc"
+      },
+      {
+        "group": "Operation",
+        "code": "is_warranty_applied",
+        "name": "Sản phẩm có được bảo hành không?",
+        "value": "Không"
+      }
+    ],
+    "warranty_info": [
+      {
+        "name": "Hướng dẫn bảo hành",
+        "value": "Xem chi tiết"
+      }
+    ],
+    "return_and_exchange_policy": "Đổi trả trong  30 ngày  nếu sp lỗi.",
+    "benefits": [
+      "Được đồng kiểm khi nhận hàng",
+      "Được hoàn tiền 200%  nếu là hàng giả.",
+      "Đổi trả miễn phí trong 30 ngày. Được đổi ý."
+    ],
+    "badges": [
+      "is_hero",
+      "text_badge",
+      "is_authentic",
+      "return_policy"
+    ],
+    "flags": {
+      "is_authentic": true,
+      "is_freeship_xtra": true,
+      "is_hero": true,
+      "is_top_brand": false,
+      "return_reason": "any_reason"
+    }
+  },
+  "seller": {
+    "seller_id": 1,
+    "name": "Tiki Trading",
+    "store_id": 40395,
+    "store_slug": "tiki-trading",
+    "url": "https://tiki.vn/cua-hang/tiki-trading",
+    "logo_url": "https://vcdn.tikicdn.com/ts/seller/d1/3f/ae/13ce3d83ab6b6c5e77e6377ad61dc4a5.jpg",
+    "is_official": true,
+    "is_best_store": false,
+    "store_level": "OFFICIAL_STORE",
+    "avg_rating_point": 4.676,
+    "review_count": 5608459,
+    "total_follower": 515552,
+    "days_since_joined": 3420,
+    "store_live_at": "2017-07-04 10:13:08",
+    "store_description": "Mua online sản phẩm của cửa hàng Tiki Trading trên Tiki.vn. ✓ chất lượng cao, uy  tín, giá tốt  ✓ Chính hãng ✓ Giao hàng toàn quốc",
+    "fetched_at": "2026-11-14T20:46:41.419299+07:00"
+  },
+  "brand": {
+    "brand_id": 48077,
+    "name": "LocknLock",
+    "slug": "locknlock",
+    "country": "Hàn Quốc",
+    "brand_page_id": 1581,
+    "brand_page_url": "https://tiki.vn/thuong-hieu/locknlock.html",
+    "thumbnail_url": "https://salt.tikicdn.com/ts/tmp/5c/9e/06/f1515b380b696a44f7d36340caac51ee.jpg",
+    "description": null,
+    "fetched_at": "2026-11-14T20:46:42.555158+07:00"
+  },
+  "categories": [
+    {
+      "category_id": 1883,
+      "name": "Nhà Cửa - Đời Sống",
+      "url": "https://tiki.vn/nha-cua-doi-song/c1883",
+      "level": 1,
+      "parent_id": null
+    },
+    {
+      "category_id": 1951,
+      "name": "Dụng cụ nhà bếp",
+      "url": "https://tiki.vn/nha-bep/c1951",
+      "level": 2,
+      "parent_id": 1883
+    },
+    {
+      "category_id": 1986,
+      "name": "Phụ kiện nhà bếp",
+      "url": "https://tiki.vn/phu-kien-nha-bep/c1986",
+      "level": 3,
+      "parent_id": 1951
+    },
+    {
+      "category_id": 2514,
+      "name": "Phụ kiện nhà bếp khác",
+      "url": "https://tiki.vn/phu-kien-nha-bep-khac/c2514",
+      "level": 4,
+      "parent_id": 1986,
+      "is_leaf": true
+    }
+  ],
+  "variants": {
+    "options": [
+      {
+        "code": "option1",
+        "name": "Kích thước",
+        "values": [
+          "20x15x22cm"
+        ]
+      },
+      {
+        "code": "option2",
+        "name": "Màu",
+        "values": [
+          "Xanh Navy",
+          "Xám"
+        ]
+      }
+    ],
+    "items": [
+      {
+        "spid": 276177984,
+        "child_id": 276177983,
+        "sku": "7577108850195",
+        "name": "Túi giữ mát đựng cơm hằng ngày LocknLock - 20x15x22cm - Xám",
+        "option_values": {
+          "option1": "20x15x22cm",
+          "option2": "Xám"
+        },
+        "price": 197780,
+        "original_price": 341000,
+        "discount_rate": 42,
+        "inventory_status": "available",
+        "seller_id": 1,
+        "selected": true
+      },
+      {
+        "spid": 276177988,
+        "child_id": 276177987,
+        "sku": "3293363248253",
+        "name": "Túi giữ mát đựng cơm hằng ngày LocknLock - 20x15x22cm - Xanh Navy",
+        "option_values": {
+          "option1": "20x15x22cm",
+          "option2": "Xanh Navy"
+        },
+        "price": 197780,
+        "original_price": 341000,
+        "discount_rate": 42,
+        "inventory_status": "available",
+        "seller_id": 1,
+        "selected": false
+      }
+    ]
+  },
+  "offers": [
+    {
+      "seller_id": 1,
+      "seller_name": "Tiki Trading",
+      "spid": 276177984,
+      "sku": "7298030266784",
+      "price": 197780,
+      "store_id": 40395,
+      "is_current": true
+    }
+  ],
+  "promotions": {
+    "coupon_text": "0 Mã Giảm Giá",
+    "coupons": [],
+    "asa_coupons": [],
+    "installment_offers": [
+      {
+        "title": "Ưu đãi đến 600k với thẻ TikiCard",
+        "summary": "Ưu đãi đến 600k với thẻ TikiCard.",
+        "type": "other"
+      },
+      {
+        "title": "Mua trước trả sau",
+        "summary": "Duyệt hồ sơ nhanh chóng qua công ty tài chính.",
+        "type": "postpaid"
+      }
+    ],
+    "delivery": {
+      "type": "ask_location",
+      "title": "Thông Tin Giao Hàng Dự Kiến",
+      "seller_name": "Nhà bán Tiki Trading",
+      "is_shopping_delivery": true,
+      "only_ship_to": null,
+      "delivery_options": null
+    }
+  },
+  "review_summary": {
+    "rating_average": 4.8,
+    "reviews_count": 23,
+    "stars": {
+      "1": {
+        "count": 1,
+        "percent": 4
+      },
+      "2": {
+        "count": 0,
+        "percent": 0
+      },
+      "3": {
+        "count": 0,
+        "percent": 0
+      },
+      "4": {
+        "count": 0,
+        "percent": 0
+      },
+      "5": {
+        "count": 22,
+        "percent": 96
+      }
+    },
+    "review_photo": {
+      "total": 2,
+      "total_photo": 3
+    },
+    "attribute_vote_summary": [],
+    "ai_summary": null
+  },
+  "reviews": [
+    {
+      "review_id": 20259022,
+      "product_id": 276177979,
+      "spid": 276177990,
+      "seller_id": 1,
+      "user_id": 13743976,
+      "rating": 5,
+      "title": "Cực kì hài lòng",
+      "content": "Good 👍",
+      "status": "approved",
+      "thank_count": 0,
+      "comment_count": 0,
+      "score": 27.77777778,
+      "new_score": 0.1673891,
+      "is_photo": false,
+      "image_urls": [],
+      "attributes": [
+        "Mua từ nhà bán Tiki Trading",
+        "Kích thước 24x17x32cm",
+        "Màu Xanh Navy"
+      ],
+      "product_attributes": [
+        "Kích thước: 24x17x32cm",
+        "Màu: Xanh Navy"
+      ],
+      "purchased": true,
+      "purchased_at": "2026-09-06T13:02:13+07:00",
+      "created_at": "2026-09-07T17:01:35+07:00",
+      "delivery_date": "2026-09-07 16:52:20",
+      "used_duration_text": "Đã dùng 9 phút",
+      "vote_attributes": {
+        "agree": [],
+        "disagree": []
+      },
+      "delivery_rating": [],
+      "comments": []
+    },
+    {
+      "review_id": 20255246,
+      "product_id": 276177979,
+      "spid": 276177990,
+      "seller_id": 1,
+      "user_id": 21181024,
+      "rating": 5,
+      "title": "Cực kì hài lòng",
+      "content": "Chất liệu vải đẹp.  Đường may chắc chắn. Rất đẹp. Mọi người nên mua",
+      "status": "approved",
+      "thank_count": 0,
+      "comment_count": 0,
+      "score": 33.33333333,
+      "new_score": 0.17581463,
+      "is_photo": true,
+      "image_urls": [
+        "https://salt.tikicdn.com/ts/review/33/36/3f/90767d2a4cc2dc53333978ae270a3954.jpg"
+      ],
+      "attributes": [
+        "Mua từ nhà bán Tiki Trading",
+        "Kích thước 24x17x32cm",
+        "Màu Xanh Navy"
+      ],
+      "product_attributes": [
+        "Kích thước: 24x17x32cm",
+        "Màu: Xanh Navy"
+      ],
+      "purchased": true,
+      "purchased_at": "2026-08-19T10:14:41+07:00",
+      "created_at": "2026-08-21T20:12:07+07:00",
+      "delivery_date": "2026-08-21 15:05:41",
+      "used_duration_text": "Đã dùng 5 giờ",
+      "vote_attributes": {
+        "agree": [],
+        "disagree": []
+      },
+      "delivery_rating": [],
+      "comments": []
+    },
+    {
+      "review_id": 20248221,
+      "product_id": 276177979,
+      "spid": 276177988,
+      "seller_id": 1,
+      "user_id": 5512512,
+      "rating": 5,
+      "title": "Cực kì hài lòng",
+      "content": "",
+      "status": "approved",
+      "thank_count": 0,
+      "comment_count": 0,
+      "score": 27.77777778,
+      "new_score": 0.16589,
+      "is_photo": false,
+      "image_urls": [],
+      "attributes": [
+        "Mua từ nhà bán Tiki Trading",
+        "Kích thước 20x15x22cm",
+        "Màu Xanh Navy"
+      ],
+      "product_attributes": [
+        "Kích thước: 20x15x22cm",
+        "Màu: Xanh Navy"
+      ],
+      "purchased": true,
+      "purchased_at": "2026-07-14T10:52:23+07:00",
+      "created_at": "2026-07-20T10:31:53+07:00",
+      "delivery_date": "2026-07-16 15:44:33",
+      "used_duration_text": "Đã dùng 4 ngày",
+      "vote_attributes": {
+        "agree": [],
+        "disagree": []
+      },
+      "delivery_rating": [],
+      "comments": []
+    },
+    {
+      "review_id": 20247257,
+      "product_id": 276177979,
+      "spid": 276177990,
+      "seller_id": 1,
+      "user_id": 5512512,
+      "rating": 5,
+      "title": "Cực kì hài lòng",
+      "content": "",
+      "status": "approved",
+      "thank_count": 0,
+      "comment_count": 0,
+      "score": 27.77777778,
+      "new_score": 0.16580636,
+      "is_photo": false,
+      "image_urls": [],
+      "attributes": [
+        "Mua từ nhà bán Tiki Trading",
+        "Kích thước 24x17x32cm",
+        "Màu Xanh Navy"
+      ],
+      "product_attributes": [
+        "Kích thước: 24x17x32cm",
+        "Màu: Xanh Navy"
+      ],
+      "purchased": true,
+      "purchased_at": "2026-06-26T13:48:53+07:00",
+      "created_at": "2026-07-15T20:31:34+07:00",
+      "delivery_date": "2026-06-29 10:13:16",
+      "used_duration_text": "Đã dùng 1 tháng",
+      "vote_attributes": {
+        "agree": [],
+        "disagree": []
+      },
+      "delivery_rating": [],
+      "comments": []
+    },
+    {
+      "review_id": 20246513,
+      "product_id": 276177979,
+      "spid": 276177986,
+      "seller_id": 1,
+      "user_id": 10018689,
+      "rating": 5,
+      "title": "Cực kì hài lòng",
+      "content": "",
+      "status": "approved",
+      "thank_count": 0,
+      "comment_count": 0,
+      "score": 27.77777778,
+      "new_score": 0.1657491,
+      "is_photo": false,
+      "image_urls": [],
+      "attributes": [
+        "Mua từ nhà bán Tiki Trading",
+        "Kích thước 24x17x32cm",
+        "Màu Xám"
+      ],
+      "product_attributes": [
+        "Kích thước: 24x17x32cm",
+        "Màu: Xám"
+      ],
+      "purchased": true,
+      "purchased_at": "2026-07-12T09:48:02+07:00",
+      "created_at": "2026-07-12T17:13:08+07:00",
+      "delivery_date": "2026-07-12 11:23:15",
+      "used_duration_text": "Đã dùng 6 giờ",
+      "vote_attributes": {
+        "agree": [],
+        "disagree": []
+      },
+      "delivery_rating": [],
+      "comments": []
+    },
+    {
+      "review_id": 20246512,
+      "product_id": 276177979,
+      "spid": 276177990,
+      "seller_id": 1,
+      "user_id": 10018689,
+      "rating": 5,
+      "title": "Cực kì hài lòng",
+      "content": "",
+      "status": "approved",
+      "thank_count": 0,
+      "comment_count": 0,
+      "score": 27.77777778,
+      "new_score": 0.1657491,
+      "is_photo": false,
+      "image_urls": [],
+      "attributes": [
+        "Mua từ nhà bán Tiki Trading",
+        "Kích thước 24x17x32cm",
+        "Màu Xanh Navy"
+      ],
+      "product_attributes": [
+        "Kích thước: 24x17x32cm",
+        "Màu: Xanh Navy"
+      ],
+      "purchased": true,
+      "purchased_at": "2026-07-12T09:46:12+07:00",
+      "created_at": "2026-07-12T17:13:02+07:00",
+      "delivery_date": "2026-07-12 11:22:07",
+      "used_duration_text": "Đã dùng 6 giờ",
+      "vote_attributes": {
+        "agree": [],
+        "disagree": []
+      },
+      "delivery_rating": [],
+      "comments": []
+    },
+    {
+      "review_id": 20246511,
+      "product_id": 276177979,
+      "spid": 276177984,
+      "seller_id": 1,
+      "user_id": 10018689,
+      "rating": 5,
+      "title": "Cực kì hài lòng",
+      "content": "",
+      "status": "approved",
+      "thank_count": 0,
+      "comment_count": 0,
+      "score": 27.77777778,
+      "new_score": 0.1657491,
+      "is_photo": false,
+      "image_urls": [],
+      "attributes": [
+        "Mua từ nhà bán Tiki Trading",
+        "Kích thước 20x15x22cm",
+        "Màu Xám"
+      ],
+      "product_attributes": [
+        "Kích thước: 20x15x22cm",
+        "Màu: Xám"
+      ],
+      "purchased": true,
+      "purchased_at": "2026-07-10T11:59:02+07:00",
+      "created_at": "2026-07-12T17:12:57+07:00",
+      "delivery_date": "2026-07-10 13:18:36",
+      "used_duration_text": "Đã dùng 2 ngày",
+      "vote_attributes": {
+        "agree": [],
+        "disagree": []
+      },
+      "delivery_rating": [],
+      "comments": []
+    },
+    {
+      "review_id": 20246510,
+      "product_id": 276177979,
+      "spid": 276177988,
+      "seller_id": 1,
+      "user_id": 10018689,
+      "rating": 5,
+      "title": "Cực kì hài lòng",
+      "content": "",
+      "status": "approved",
+      "thank_count": 0,
+      "comment_count": 0,
+      "score": 27.77777778,
+      "new_score": 0.16574909,
+      "is_photo": false,
+      "image_urls": [],
+      "attributes": [
+        "Mua từ nhà bán Tiki Trading",
+        "Kích thước 20x15x22cm",
+        "Màu Xanh Navy"
+      ],
+      "product_attributes": [
+        "Kích thước: 20x15x22cm",
+        "Màu: Xanh Navy"
+      ],
+      "purchased": true,
+      "purchased_at": "2026-07-10T11:59:02+07:00",
+      "created_at": "2026-07-12T17:12:30+07:00",
+      "delivery_date": "2026-07-10 13:18:36",
+      "used_duration_text": "Đã dùng 2 ngày",
+      "vote_attributes": {
+        "agree": [],
+        "disagree": []
+      },
+      "delivery_rating": [],
+      "comments": []
+    },
+    {
+      "review_id": 20240195,
+      "product_id": 276177979,
+      "spid": 276177990,
+      "seller_id": 1,
+      "user_id": 22631094,
+      "rating": 5,
+      "title": "Cực kì hài lòng",
+      "content": "",
+      "status": "approved",
+      "thank_count": 0,
+      "comment_count": 0,
+      "score": 27.77777778,
+      "new_score": 0.16523548,
+      "is_photo": false,
+      "image_urls": [],
+      "attributes": [
+        "Mua từ nhà bán Tiki Trading",
+        "Kích thước 24x17x32cm",
+        "Màu Xanh Navy"
+      ],
+      "product_attributes": [
+        "Kích thước: 24x17x32cm",
+        "Màu: Xanh Navy"
+      ],
+      "purchased": true,
+      "purchased_at": "2026-05-31T20:47:13+07:00",
+      "created_at": "2026-06-14T13:42:14+07:00",
+      "delivery_date": "2026-06-02 18:01:33",
+      "used_duration_text": "Đã dùng 12 ngày",
+      "vote_attributes": {
+        "agree": [],
+        "disagree": []
+      },
+      "delivery_rating": [],
+      "comments": []
+    },
+    {
+      "review_id": 20218105,
+      "product_id": 276177979,
+      "spid": 276177988,
+      "seller_id": 1,
+      "user_id": 8258940,
+      "rating": 5,
+      "title": "Cực kì hài lòng",
+      "content": "",
+      "status": "approved",
+      "thank_count": 0,
+      "comment_count": 0,
+      "score": 27.77777778,
+      "new_score": 0.16346237,
+      "is_photo": false,
+      "image_urls": [],
+      "attributes": [
+        "Mua từ nhà bán Tiki Trading",
+        "Kích thước 20x15x22cm",
+        "Màu Xanh Navy"
+      ],
+      "product_attributes": [
+        "Kích thước: 20x15x22cm",
+        "Màu: Xanh Navy"
+      ],
+      "purchased": true,
+      "purchased_at": "2026-03-03T08:41:44+07:00",
+      "created_at": "2026-03-09T09:42:13+07:00",
+      "delivery_date": "2026-03-03 10:39:35",
+      "used_duration_text": "Đã dùng 6 ngày",
+      "vote_attributes": {
+        "agree": [],
+        "disagree": []
+      },
+      "delivery_rating": [],
+      "comments": []
+    },
+    {
+      "review_id": 20204981,
+      "product_id": 276177979,
+      "spid": 276177984,
+      "seller_id": 1,
+      "user_id": 7469966,
+      "rating": 5,
+      "title": "Cực kì hài lòng",
+      "content": "",
+      "status": "approved",
+      "thank_count": 0,
+      "comment_count": 0,
+      "score": 27.77777778,
+      "new_score": 0.16242733,
+      "is_photo": false,
+      "image_urls": [],
+      "attributes": [
+        "Mua từ nhà bán Tiki Trading",
+        "Kích thước 20x15x22cm",
+        "Màu Xám"
+      ],
+      "product_attributes": [
+        "Kích thước: 20x15x22cm",
+        "Màu: Xám"
+      ],
+      "purchased": true,
+      "purchased_at": "2025-11-13T14:33:47+07:00",
+      "created_at": "2026-01-11T16:25:31+07:00",
+      "delivery_date": "2025-11-13 17:31:03",
+      "used_duration_text": "Đã dùng 2 tháng",
+      "vote_attributes": {
+        "agree": [],
+        "disagree": []
+      },
+      "delivery_rating": [],
+      "comments": []
+    },
+    {
+      "review_id": 20186096,
+      "product_id": 276177979,
+      "spid": 276177988,
+      "seller_id": 1,
+      "user_id": 2111358,
+      "rating": 5,
+      "title": "Cực kì hài lòng",
+      "content": "",
+      "status": "approved",
+      "thank_count": 0,
+      "comment_count": 0,
+      "score": 27.77777778,
+      "new_score": 0.16108107,
+      "is_photo": false,
+      "image_urls": [],
+      "attributes": [
+        "Mua từ nhà bán Tiki Trading",
+        "Kích thước 20x15x22cm",
+        "Màu Xanh Navy"
+      ],
+      "product_attributes": [
+        "Kích thước: 20x15x22cm",
+        "Màu: Xanh Navy"
+      ],
+      "purchased": true,
+      "purchased_at": "2025-06-11T13:33:18+07:00",
+      "created_at": "2025-10-29T21:49:04+07:00",
+      "delivery_date": "2025-06-11 17:53:35",
+      "used_duration_text": "Đã dùng 5 tháng",
+      "vote_attributes": {
+        "agree": [],
+        "disagree": []
+      },
+      "delivery_rating": [],
+      "comments": []
+    },
+    {
+      "review_id": 20182964,
+      "product_id": 276177979,
+      "spid": 276177988,
+      "seller_id": 1,
+      "user_id": 22285866,
+      "rating": 5,
+      "title": "Cực kì hài lòng",
+      "content": "Đường may chắc chắn, đẹp, .ok",
+      "status": "approved",
+      "thank_count": 0,
+      "comment_count": 0,
+      "score": 27.77777778,
+      "new_score": 0.16355809,
+      "is_photo": false,
+      "image_urls": [],
+      "attributes": [
+        "Mua từ nhà bán Tiki Trading",
+        "Kích thước 20x15x22cm",
+        "Màu Xanh Navy"
+      ],
+      "product_attributes": [
+        "Kích thước: 20x15x22cm",
+        "Màu: Xanh Navy"
+      ],
+      "purchased": true,
+      "purchased_at": "2025-10-17T12:57:00+07:00",
+      "created_at": "2025-10-19T12:23:54+07:00",
+      "delivery_date": "2025-10-18 09:39:19",
+      "used_duration_text": "Đã dùng 1 ngày",
+      "vote_attributes": {
+        "agree": [],
+        "disagree": []
+      },
+      "delivery_rating": [
+        {
+          "question": "Thời gian giao hàng?",
+          "option": "Giao đúng hẹn"
+        },
+        {
+          "question": "Thái độ của shipper?",
+          "option": "Lịch sự"
+        },
+        {
+          "question": "Giờ giao hàng?",
+          "option": "Có hẹn giờ trước"
+        },
+        {
+          "question": "Cách đóng gói sản phẩm?",
+          "option": "Cẩn thận"
+        }
+      ],
+      "comments": []
+    },
+    {
+      "review_id": 20175333,
+      "product_id": 276177979,
+      "spid": 276177988,
+      "seller_id": 1,
+      "user_id": 13125950,
+      "rating": 5,
+      "title": "Cực kì hài lòng",
+      "content": "",
+      "status": "approved",
+      "thank_count": 0,
+      "comment_count": 0,
+      "score": 27.77777778,
+      "new_score": 0.16051091,
+      "is_photo": false,
+      "image_urls": [],
+      "attributes": [
+        "Mua từ nhà bán Tiki Trading",
+        "Kích thước 20x15x22cm",
+        "Màu Xanh Navy"
+      ],
+      "product_attributes": [
+        "Kích thước: 20x15x22cm",
+        "Màu: Xanh Navy"
+      ],
+      "purchased": true,
+      "purchased_at": "2025-09-27T17:26:17+07:00",
+      "created_at": "2025-09-28T15:56:49+07:00",
+      "delivery_date": "2025-09-27 19:37:07",
+      "used_duration_text": "Đã dùng 1 ngày",
+      "vote_attributes": {
+        "agree": [],
+        "disagree": []
+      },
+      "delivery_rating": [],
+      "comments": []
+    },
+    {
+      "review_id": 20167226,
+      "product_id": 276177979,
+      "spid": 276177988,
+      "seller_id": 1,
+      "user_id": 9815146,
+      "rating": 5,
+      "title": "Cực kì hài lòng",
+      "content": "Hàng đep ,chất lượng tốt.",
+      "status": "approved",
+      "thank_count": 0,
+      "comment_count": 0,
+      "score": 27.77777778,
+      "new_score": 0.16239068,
+      "is_photo": false,
+      "image_urls": [],
+      "attributes": [
+        "Mua từ nhà bán Tiki Trading",
+        "Kích thước 20x15x22cm",
+        "Màu Xanh Navy"
+      ],
+      "product_attributes": [
+        "Kích thước: 20x15x22cm",
+        "Màu: Xanh Navy"
+      ],
+      "purchased": true,
+      "purchased_at": "2025-09-06T11:17:29+07:00",
+      "created_at": "2025-09-07T11:05:59+07:00",
+      "delivery_date": "2025-09-06 14:04:51",
+      "used_duration_text": "Đã dùng 1 ngày",
+      "vote_attributes": {
+        "agree": [],
+        "disagree": []
+      },
+      "delivery_rating": [],
+      "comments": []
+    },
+    {
+      "review_id": 20127525,
+      "product_id": 276177979,
+      "spid": 276177988,
+      "seller_id": 1,
+      "user_id": 14247492,
+      "rating": 5,
+      "title": "Cực kì hài lòng",
+      "content": "",
+      "status": "approved",
+      "thank_count": 0,
+      "comment_count": 0,
+      "score": 27.77777778,
+      "new_score": 0.15819835,
+      "is_photo": false,
+      "image_urls": [],
+      "attributes": [
+        "Mua từ nhà bán Tiki Trading",
+        "Kích thước 20x15x22cm",
+        "Màu Xanh Navy"
+      ],
+      "product_attributes": [
+        "Kích thước: 20x15x22cm",
+        "Màu: Xanh Navy"
+      ],
+      "purchased": true,
+      "purchased_at": "2025-03-04T15:36:24+07:00",
+      "created_at": "2025-05-24T22:28:33+07:00",
+      "delivery_date": "2025-03-06 15:05:57",
+      "used_duration_text": "Đã dùng 3 tháng",
+      "vote_attributes": {
+        "agree": [],
+        "disagree": []
+      },
+      "delivery_rating": [],
+      "comments": []
+    },
+    {
+      "review_id": 20102939,
+      "product_id": 276177979,
+      "spid": 276177988,
+      "seller_id": 1,
+      "user_id": 7358968,
+      "rating": 5,
+      "title": "Cực kì hài lòng",
+      "content": "Hàng đẹp, giống như hình, giao hàng nhanh chóng.",
+      "status": "approved",
+      "thank_count": 0,
+      "comment_count": 1,
+      "score": 27.77777778,
+      "new_score": 0.16101796,
+      "is_photo": false,
+      "image_urls": [],
+      "attributes": [
+        "Mua từ nhà bán Tiki Trading",
+        "Kích thước 20x15x22cm",
+        "Màu Xanh Navy"
+      ],
+      "product_attributes": [
+        "Kích thước: 20x15x22cm",
+        "Màu: Xanh Navy"
+      ],
+      "purchased": true,
+      "purchased_at": "2025-03-26T23:24:11+07:00",
+      "created_at": "2025-03-28T13:22:51+07:00",
+      "delivery_date": "2025-03-27 10:41:46",
+      "used_duration_text": "Đã dùng 1 ngày",
+      "vote_attributes": {
+        "agree": [],
+        "disagree": []
+      },
+      "delivery_rating": [
+        {
+          "question": "Thời gian giao hàng?",
+          "option": "Giao đúng hẹn"
+        },
+        {
+          "question": "Thái độ của shipper?",
+          "option": "Lịch sự"
+        },
+        {
+          "question": "Giờ giao hàng?",
+          "option": "Có hẹn giờ trước"
+        },
+        {
+          "question": "Cách đóng gói sản phẩm?",
+          "option": "Cẩn thận"
+        }
+      ],
+      "comments": [
+        {
+          "comment_id": 3317569,
+          "commentator": "seller",
+          "commentator_id": 1,
+          "commentator_name": "Tiki Trading",
+          "content": "Cảm ơn bạn đã phản hồi và bên cạnh đó Tiki cũng rất cảm ơn những góp ý chân thành từ bạn. Tiki sẽ nỗ lực hơn trong việc mang đến những trải nghiệm tốt nhất cho người dùng cũng như ghi nhận những thiếu sót để hoàn thiện hơn trong tương lai. Mong bạn sẽ tiếp tục tin tưởng và đồng hành cùng Tiki nhé.",
+          "created_at": "2025-03-29T12:14:06+07:00"
+        }
+      ]
+    },
+    {
+      "review_id": 20101790,
+      "product_id": 276177979,
+      "spid": 276177986,
+      "seller_id": 1,
+      "user_id": 22504128,
+      "rating": 5,
+      "title": "Cực kì hài lòng",
+      "content": "Túi đẹp và chắc chắn",
+      "status": "approved",
+      "thank_count": 0,
+      "comment_count": 1,
+      "score": 38.88888889,
+      "new_score": 0.16504358,
+      "is_photo": true,
+      "image_urls": [
+        "https://salt.tikicdn.com/ts/review/bb/2b/cb/3ced85cbbaa2be1c72b8fda6f3bc5745.jpg",
+        "https://salt.tikicdn.com/ts/review/10/f4/5c/106b2a4a979b161d41fc7330a0f65686.jpg"
+      ],
+      "attributes": [
+        "Mua từ nhà bán Tiki Trading",
+        "Kích thước 24x17x32cm",
+        "Màu Xám"
+      ],
+      "product_attributes": [
+        "Kích thước: 24x17x32cm",
+        "Màu: Xám"
+      ],
+      "purchased": true,
+      "purchased_at": "2025-02-04T09:23:03+07:00",
+      "created_at": "2025-03-26T07:23:36+07:00",
+      "delivery_date": "2025-02-04 11:17:34",
+      "used_duration_text": "Đã dùng 2 tháng",
+      "vote_attributes": {
+        "agree": [],
+        "disagree": []
+      },
+      "delivery_rating": [],
+      "comments": [
+        {
+          "comment_id": 3317156,
+          "commentator": "seller",
+          "commentator_id": 1,
+          "commentator_name": "Tiki Trading",
+          "content": "Tiki trân quý bạn đã chọn mua hàng và đánh giá sản phẩm tại Tiki, rất mong được đồng hành với bạn trong thời gian tới nhiều hơn nữa nha. Tiki luôn lắng nghe bạn, đừng ngừng ngại để lại góp ý giúp Tiki cải thiện mỗi ngày nha. Tiki cảm ơn bạn nhiều.",
+          "created_at": "2025-03-27T19:00:09+07:00"
+        }
+      ]
+    },
+    {
+      "review_id": 20049429,
+      "product_id": 276177979,
+      "spid": 276177988,
+      "seller_id": 1,
+      "user_id": 128328,
+      "rating": 5,
+      "title": "Cực kì hài lòng",
+      "content": "",
+      "status": "approved",
+      "thank_count": 0,
+      "comment_count": 1,
+      "score": 27.77777778,
+      "new_score": 0.15527391,
+      "is_photo": false,
+      "image_urls": [],
+      "attributes": [
+        "Mua từ nhà bán Tiki Trading",
+        "Kích thước 20x15x22cm",
+        "Màu Xanh Navy"
+      ],
+      "product_attributes": [
+        "Kích thước: 20x15x22cm",
+        "Màu: Xanh Navy"
+      ],
+      "purchased": true,
+      "purchased_at": "2024-12-14T08:53:56+07:00",
+      "created_at": "2024-12-15T16:15:04+07:00",
+      "delivery_date": "2024-12-14 10:57:15",
+      "used_duration_text": "Đã dùng 1 ngày",
+      "vote_attributes": {
+        "agree": [],
+        "disagree": []
+      },
+      "delivery_rating": [
+        {
+          "question": "Thời gian giao hàng?",
+          "option": "Giao đúng hẹn"
+        },
+        {
+          "question": "Thái độ của shipper?",
+          "option": "Lịch sự"
+        },
+        {
+          "question": "Giờ giao hàng?",
+          "option": "Có hẹn giờ trước"
+        },
+        {
+          "question": "Cách đóng gói sản phẩm?",
+          "option": "Cẩn thận"
+        }
+      ],
+      "comments": [
+        {
+          "comment_id": 3291340,
+          "commentator": "seller",
+          "commentator_id": 1,
+          "commentator_name": "Tiki Trading",
+          "content": "Cảm ơn anh Chiến đã tin tưởng Tiki và cho Tiki 5⭐️! Tiki yêu anh nhiều ❤️",
+          "created_at": "2024-12-19T16:51:21+07:00"
+        }
+      ]
+    },
+    {
+      "review_id": 20040319,
+      "product_id": 276177979,
+      "spid": 276177990,
+      "seller_id": 1,
+      "user_id": 11531086,
+      "rating": 5,
+      "title": "Cực kì hài lòng",
+      "content": "Túi đẹp và chắc chắn, nhiều ngăn tiện dung",
+      "status": "approved",
+      "thank_count": 0,
+      "comment_count": 1,
+      "score": 0.0779321,
+      "new_score": 0.15873786,
+      "is_photo": false,
+      "image_urls": [],
+      "attributes": [
+        "Mua từ nhà bán Tiki Trading",
+        "Kích thước 24x17x32cm",
+        "Màu Xanh Navy"
+      ],
+      "product_attributes": [
+        "Kích thước: 24x17x32cm",
+        "Màu: Xanh Navy"
+      ],
+      "purchased": true,
+      "purchased_at": "2024-10-11T21:11:24+07:00",
+      "created_at": "2024-11-30T21:57:08+07:00",
+      "delivery_date": "2024-10-13 18:17:27",
+      "used_duration_text": "Đã dùng 2 tháng",
+      "vote_attributes": {
+        "agree": [],
+        "disagree": []
+      },
+      "delivery_rating": [],
+      "comments": [
+        {
+          "comment_id": 3287370,
+          "commentator": "seller",
+          "commentator_id": 1,
+          "commentator_name": "Tiki Trading",
+          "content": "Tiki rất vui khi nhận được đánh giá 5⭐️từ chị Dung. Hy vọng chị sẽ tiếp tục ủng hộ Tiki nha!",
+          "created_at": "2024-12-12T17:24:53+07:00"
+        }
+      ]
+    },
+    {
+      "review_id": 20004206,
+      "product_id": 276177979,
+      "spid": 276177986,
+      "seller_id": 1,
+      "user_id": 11531086,
+      "rating": 5,
+      "title": "Cực kì hài lòng",
+      "content": "Đẹp, chắc chắn",
+      "status": "approved",
+      "thank_count": 0,
+      "comment_count": 1,
+      "score": 0.02956328,
+      "new_score": 0.15550906,
+      "is_photo": false,
+      "image_urls": [],
+      "attributes": [
+        "Mua từ nhà bán Tiki Trading",
+        "Kích thước 24x17x32cm",
+        "Màu Xám"
+      ],
+      "product_attributes": [
+        "Kích thước: 24x17x32cm",
+        "Màu: Xám"
+      ],
+      "purchased": true,
+      "purchased_at": "2024-10-11T21:11:24+07:00",
+      "created_at": "2024-10-12T20:13:58+07:00",
+      "delivery_date": "2024-10-11 16:00:52",
+      "used_duration_text": "Đã dùng 1 ngày",
+      "vote_attributes": {
+        "agree": [],
+        "disagree": []
+      },
+      "delivery_rating": [
+        {
+          "question": "Thời gian giao hàng?",
+          "option": "Giao đúng hẹn"
+        },
+        {
+          "question": "Thái độ của shipper?",
+          "option": "Lịch sự"
+        },
+        {
+          "question": "Giờ giao hàng?",
+          "option": "Có hẹn giờ trước"
+        },
+        {
+          "question": "Cách đóng gói sản phẩm?",
+          "option": "Cẩn thận"
+        }
+      ],
+      "comments": [
+        {
+          "comment_id": 3265853,
+          "commentator": "seller",
+          "commentator_id": 1,
+          "commentator_name": "Tiki Trading",
+          "content": "Cảm ơn bạn đã tin tưởng Tiki và cho Tiki 5⭐️! Thật tuyệt vời khi Tiki có một khách hàng là bạn ❤️",
+          "created_at": "2024-10-13T13:38:05+07:00"
+        }
+      ]
+    },
+    {
+      "review_id": 19512811,
+      "product_id": 276177979,
+      "spid": 269982887,
+      "seller_id": 1,
+      "user_id": 1169725,
+      "rating": 1,
+      "title": "Rất không hài lòng",
+      "content": "Hình chụp trên trang thì thấy lớn nhưng khi nhận hàng thì quá bé so với hình sản phẩm trên Tiki. Mình không đựng đủ 3 hộp cơm và đồ ăn",
+      "status": "approved",
+      "thank_count": 0,
+      "comment_count": 1,
+      "score": 0.00618645,
+      "new_score": 0.15839212,
+      "is_photo": false,
+      "image_urls": [],
+      "attributes": [
+        "Mua từ nhà bán Tiki Trading",
+        "Kích thước 20x15x22cm",
+        "Màu Xanh Lá"
+      ],
+      "product_attributes": [
+        "Kích thước: 20x15x22cm",
+        "Màu: Xanh Lá"
+      ],
+      "purchased": true,
+      "purchased_at": "2023-09-05T18:18:07+07:00",
+      "created_at": "2023-09-07T20:59:33+07:00",
+      "delivery_date": "2023-09-06 09:07:41",
+      "used_duration_text": "Đã dùng 2 ngày",
+      "vote_attributes": {
+        "agree": [],
+        "disagree": []
+      },
+      "delivery_rating": [],
+      "comments": [
+        {
+          "comment_id": 3043375,
+          "commentator": "tikicare",
+          "commentator_id": 0,
+          "commentator_name": "Tiki Care",
+          "content": "Chào bạn, Tiki cảm ơn những chia sẻ và góp ý từ bạn. Tiki rất tiếc vì sản phẩm chưa được như mong đợi. Rất hy vọng các sản phẩm khác tại Tiki sẽ làm bạn hài lòng hơn trong thời gian tới. Trường hợp cần hỗ trợ thêm thông tin, bạn vui lòng liên hệ với Tiki tại: https://tiki.vn/lien-he/gui-yeu-cau hoặc tổng đài 1900.6035 nhé. Trân trọng.",
+          "created_at": "2023-09-08T15:17:06+07:00"
+        }
+      ]
+    },
+    {
+      "review_id": 19448903,
+      "product_id": 276177979,
+      "spid": 269982887,
+      "seller_id": 1,
+      "user_id": 1093905,
+      "rating": 5,
+      "title": "Cực kì hài lòng",
+      "content": "",
+      "status": "approved",
+      "thank_count": 0,
+      "comment_count": 0,
+      "score": 0.00570268,
+      "new_score": 0.14628147,
+      "is_photo": false,
+      "image_urls": [],
+      "attributes": [
+        "Mua từ nhà bán Tiki Trading",
+        "Kích thước 20x15x22cm",
+        "Màu Xanh Lá"
+      ],
+      "product_attributes": [
+        "Kích thước: 20x15x22cm",
+        "Màu: Xanh Lá"
+      ],
+      "purchased": true,
+      "purchased_at": "2023-07-23T20:13:52+07:00",
+      "created_at": "2023-08-10T21:23:14+07:00",
+      "delivery_date": "2023-07-24 14:00:35",
+      "used_duration_text": "Đã dùng 1 tháng",
+      "vote_attributes": {
+        "agree": [],
+        "disagree": []
+      },
+      "delivery_rating": [],
+      "comments": []
+    }
+  ],
+  "users": [
+    {
+      "user_id": 13743976,
+      "name": "Quocbao Le",
+      "region": null,
+      "account_created_at": "2019-08-31 11:51:08",
+      "group_id": 8,
+      "joined_text": "Đã tham gia 7 năm",
+      "total_review": 2,
+      "total_thank": 0
+    },
+    {
+      "user_id": 21181024,
+      "name": "Hải Yến ",
+      "region": null,
+      "account_created_at": "2021-04-03 20:36:45",
+      "group_id": 8,
+      "joined_text": "Đã tham gia 6 năm",
+      "total_review": 2,
+      "total_thank": 0
+    },
+    {
+      "user_id": 5512512,
+      "name": "Thanh Xoan Ngo",
+      "region": null,
+      "account_created_at": "2017-07-26 14:32:20",
+      "group_id": 8,
+      "joined_text": "Đã tham gia 9 năm",
+      "total_review": 329,
+      "total_thank": 1
+    },
+    {
+      "user_id": 10018689,
+      "name": "Vu Nguyen",
+      "region": null,
+      "account_created_at": "2018-12-26 11:15:53",
+      "group_id": 8,
+      "joined_text": "Đã tham gia 8 năm",
+      "total_review": 60,
+      "total_thank": 0
+    },
+    {
+      "user_id": 22631094,
+      "name": "Moon Moon",
+      "region": null,
+      "account_created_at": "2021-07-14 19:52:34",
+      "group_id": 8,
+      "joined_text": "Đã tham gia 5 năm",
+      "total_review": 39,
+      "total_thank": 1
+    },
+    {
+      "user_id": 8258940,
+      "name": "Nguyễn Thanh Nhã",
+      "region": null,
+      "account_created_at": "2018-10-06 11:39:37",
+      "group_id": 8,
+      "joined_text": "Đã tham gia 8 năm",
+      "total_review": 100,
+      "total_thank": 3
+    },
+    {
+      "user_id": 7469966,
+      "name": "Nguyễn Thiện Tâm",
+      "region": null,
+      "account_created_at": "2018-07-15 12:16:01",
+      "group_id": 8,
+      "joined_text": "Đã tham gia 8 năm",
+      "total_review": 63,
+      "total_thank": 8
+    },
+    {
+      "user_id": 2111358,
+      "name": "Tiến Đạt",
+      "region": null,
+      "account_created_at": "2017-01-30 07:12:09",
+      "group_id": 8,
+      "joined_text": "Đã tham gia 10 năm",
+      "total_review": 15,
+      "total_thank": 0
+    },
+    {
+      "user_id": 22285866,
+      "name": "Đặng Thắng",
+      "region": null,
+      "account_created_at": "2021-06-21 10:07:53",
+      "group_id": 8,
+      "joined_text": "Đã tham gia 6 năm",
+      "total_review": 280,
+      "total_thank": 1
+    },
+    {
+      "user_id": 13125950,
+      "name": "Nguyễn Đại Lợi",
+      "region": null,
+      "account_created_at": "2019-07-28 16:40:09",
+      "group_id": 8,
+      "joined_text": "Đã tham gia 7 năm",
+      "total_review": 51,
+      "total_thank": 0
+    },
+    {
+      "user_id": 9815146,
+      "name": "Hiêp Nguyên",
+      "region": null,
+      "account_created_at": "2018-12-13 21:46:40",
+      "group_id": 8,
+      "joined_text": "Đã tham gia 8 năm",
+      "total_review": 85,
+      "total_thank": 2
+    },
+    {
+      "user_id": 14247492,
+      "name": "Pham Ha",
+      "region": null,
+      "account_created_at": "2019-10-02 14:40:30",
+      "group_id": 8,
+      "joined_text": "Đã tham gia 7 năm",
+      "total_review": 13,
+      "total_thank": 0
+    },
+    {
+      "user_id": 7358968,
+      "name": "Nguyễn Thành",
+      "region": null,
+      "account_created_at": "2018-06-26 09:13:32",
+      "group_id": 8,
+      "joined_text": "Đã tham gia 9 năm",
+      "total_review": 33,
+      "total_thank": 0
+    },
+    {
+      "user_id": 22504128,
+      "name": "Dang Nguyen Thanh Nhu",
+      "region": null,
+      "account_created_at": "2021-07-05 20:03:59",
+      "group_id": 8,
+      "joined_text": "Đã tham gia 5 năm",
+      "total_review": 5,
+      "total_thank": 0
+    },
+    {
+      "user_id": 128328,
+      "name": "Lê Anh Chiến",
+      "region": null,
+      "account_created_at": "2013-06-19 20:39:09",
+      "group_id": 8,
+      "joined_text": "Đã tham gia 14 năm",
+      "total_review": 97,
+      "total_thank": 34
+    },
+    {
+      "user_id": 11531086,
+      "name": "Nguyễn minh kim dung",
+      "region": null,
+      "account_created_at": "2019-03-28 19:22:01",
+      "group_id": 8,
+      "joined_text": "Đã tham gia 8 năm",
+      "total_review": 17,
+      "total_thank": 2
+    },
+    {
+      "user_id": 1169725,
+      "name": "NGUYEN VU THU NHAN",
+      "region": null,
+      "account_created_at": "2016-02-19 07:16:56",
+      "group_id": 8,
+      "joined_text": "Đã tham gia 11 năm",
+      "total_review": 99,
+      "total_thank": 4
+    },
+    {
+      "user_id": 1093905,
+      "name": "Doan Thi Hong Van",
+      "region": null,
+      "account_created_at": "2016-01-05 14:37:28",
+      "group_id": 8,
+      "joined_text": "Đã tham gia 11 năm",
+      "total_review": 82,
+      "total_thank": 1
+    }
+  ],
+  "crawl_meta": {
+    "review_sort": "id|desc",
+    "review_pages_fetched": 2,
+    "max_review_pages": 5,
+    "reviews_truncated": false,
+    "n_requests": 9,
+    "fetch_status": {
+      "product": 200,
+      "seller_widget": 200,
+      "store": 200,
+      "brand": 200,
+      "delivery": 200,
+      "coupon": 200,
+      "reviews_p1": 200,
+      "reviews_p2": 200,
+      "review_analysis": 200
+    }
+  }
+}

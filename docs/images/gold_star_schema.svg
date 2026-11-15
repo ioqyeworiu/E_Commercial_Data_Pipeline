@@ -1,0 +1,145 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 680" width="1200" height="680" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif">
+  <rect x="0" y="0" width="1200" height="680" rx="12" fill="#ffffff"/>
+  <text x="600" y="34" text-anchor="middle" font-size="20" font-weight="700" fill="#111827">Gold layer — star schema (ClickHouse · ecommercial_warehouse)</text>
+
+  <!-- ===================== RELATIONSHIP LINES (drawn first, under boxes) ===================== -->
+  <g stroke-width="2" fill="none" stroke-linecap="round">
+    <!-- product facts (blue) -> date, product, category, brand, seller -->
+    <g stroke="#2563eb" stroke-opacity="0.85">
+      <line x1="90"  y1="410" x2="112"  y2="190"/>
+      <line x1="200" y1="410" x2="307"  y2="190"/>
+      <line x1="320" y1="410" x2="502"  y2="190"/>
+      <line x1="440" y1="410" x2="697"  y2="190"/>
+      <line x1="560" y1="410" x2="892"  y2="190"/>
+    </g>
+    <!-- review fact (pink) -> date, product, category, brand, seller, reviewer -->
+    <g stroke="#db2777" stroke-opacity="0.85">
+      <line x1="668" y1="410" x2="124"  y2="190"/>
+      <line x1="700" y1="410" x2="319"  y2="190"/>
+      <line x1="732" y1="410" x2="514"  y2="190"/>
+      <line x1="764" y1="410" x2="709"  y2="190"/>
+      <line x1="796" y1="410" x2="904"  y2="190"/>
+      <line x1="880" y1="410" x2="1087" y2="190"/>
+    </g>
+    <!-- seller daily (green) -> date, seller -->
+    <g stroke="#16a34a" stroke-opacity="0.85" stroke-dasharray="7 5">
+      <line x1="965"  y1="410" x2="100" y2="190"/>
+      <line x1="1060" y1="410" x2="880" y2="190"/>
+    </g>
+  </g>
+
+  <!-- ===================== DIMENSIONS ===================== -->
+  <g font-size="12" fill="#1f2937">
+    <!-- dim_date -->
+    <rect x="30" y="60" width="165" height="130" rx="8" fill="#fef9c3" stroke="#a16207" stroke-width="1.5"/>
+    <text x="112" y="84" text-anchor="middle" font-weight="700" font-size="13">gold_dim_date</text>
+    <text x="42" y="108">🔑 date_key (YYYYMMDD)</text>
+    <text x="42" y="127">lịch 2015 – 2030</text>
+    <text x="42" y="146">ngày sale 10.10, 11.11…</text>
+    <text x="42" y="165">lễ, Tết, cuối tuần</text>
+
+    <!-- dim_product -->
+    <rect x="225" y="60" width="165" height="130" rx="8" fill="#fef9c3" stroke="#a16207" stroke-width="1.5"/>
+    <text x="307" y="84" text-anchor="middle" font-weight="700" font-size="13">gold_dim_product</text>
+    <text x="237" y="108">🔑 product_key (version)</text>
+    <text x="237" y="127">product_id = url_id</text>
+    <text x="237" y="146">SCD Type 2</text>
+    <text x="237" y="165">valid_from / valid_to</text>
+
+    <!-- dim_category -->
+    <rect x="420" y="60" width="165" height="130" rx="8" fill="#fef9c3" stroke="#a16207" stroke-width="1.5"/>
+    <text x="502" y="84" text-anchor="middle" font-weight="700" font-size="13">gold_dim_category</text>
+    <text x="432" y="108">🔑 category_key</text>
+    <text x="432" y="127">category_level_1 … 6</text>
+    <text x="432" y="146">category_path, depth</text>
+    <text x="432" y="165">leaf_category</text>
+
+    <!-- dim_brand -->
+    <rect x="615" y="60" width="165" height="130" rx="8" fill="#fef9c3" stroke="#a16207" stroke-width="1.5"/>
+    <text x="697" y="84" text-anchor="middle" font-weight="700" font-size="13">gold_dim_brand</text>
+    <text x="627" y="108">🔑 brand_key</text>
+    <text x="627" y="127" font-size="10.5">= SHA256(brand_normalized)</text>
+    <text x="627" y="146">name_aliases, origins</text>
+    <text x="627" y="165">entity resolution</text>
+
+    <!-- dim_seller -->
+    <rect x="810" y="60" width="165" height="130" rx="8" fill="#fef9c3" stroke="#a16207" stroke-width="1.5"/>
+    <text x="892" y="84" text-anchor="middle" font-weight="700" font-size="13">gold_dim_seller</text>
+    <text x="822" y="108">🔑 seller_key</text>
+    <text x="822" y="127">= SHA256(tên seller)</text>
+    <text x="822" y="146">is_official</text>
+    <text x="822" y="165">rating nằm ở fact</text>
+
+    <!-- dim_reviewer -->
+    <rect x="1005" y="60" width="165" height="130" rx="8" fill="#fef9c3" stroke="#a16207" stroke-width="1.5"/>
+    <text x="1087" y="84" text-anchor="middle" font-weight="700" font-size="13">gold_dim_reviewer</text>
+    <text x="1017" y="108">🔑 user_key</text>
+    <text x="1017" y="127">= SHA256(user_name)</text>
+    <text x="1017" y="146">tenure_band</text>
+    <text x="1017" y="165">reviewed_cnt</text>
+  </g>
+
+  <!-- ===================== FACTS ===================== -->
+  <!-- product-grain fact group -->
+  <rect x="30" y="410" width="584" height="200" rx="10" fill="#eff6ff" stroke="#1d4ed8" stroke-width="1.5" stroke-dasharray="6 4"/>
+  <text x="322" y="432" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1d4ed8">Fact theo sản phẩm — cùng 5 dimension (date, product, category, brand, seller)</text>
+
+  <g font-size="11.5" fill="#1f2937">
+    <rect x="42" y="445" width="180" height="150" rx="8" fill="#dbeafe" stroke="#1d4ed8" stroke-width="1.5"/>
+    <text x="132" y="467" text-anchor="middle" font-weight="700" font-size="11.5">F1 · gold_fact_product_snapshot</text>
+    <text x="52" y="491" font-weight="600">grain: 1 sản phẩm × 1 lần crawl</text>
+    <text x="52" y="511">transaction fact</text>
+    <text x="52" y="531">list/sell price, discount</text>
+    <text x="52" y="551">sold_cum, rating (lũy kế)</text>
+    <text x="52" y="571">seller_rate tại lúc crawl</text>
+
+    <rect x="232" y="445" width="180" height="150" rx="8" fill="#dbeafe" stroke="#1d4ed8" stroke-width="1.5"/>
+    <text x="322" y="467" text-anchor="middle" font-weight="700" font-size="11.5">F2 · gold_fact_product_daily</text>
+    <text x="242" y="491" font-weight="600">grain: 1 sản phẩm × 1 ngày</text>
+    <text x="242" y="511">periodic snapshot</text>
+    <text x="242" y="531">open/close/min/max giá</text>
+    <text x="242" y="551">units_sold_est, revenue_est</text>
+    <text x="242" y="571">new_ratings, price_change_cnt</text>
+
+    <rect x="422" y="445" width="180" height="150" rx="8" fill="#dbeafe" stroke="#1d4ed8" stroke-width="1.5"/>
+    <text x="512" y="467" text-anchor="middle" font-weight="700" font-size="11.5">F3 · gold_fact_price_change</text>
+    <text x="432" y="491" font-weight="600">grain: 1 lần đổi giá</text>
+    <text x="432" y="511">event fact</text>
+    <text x="432" y="531">old / new sell &amp; list price</text>
+    <text x="432" y="551">change_pct, direction</text>
+    <text x="432" y="571">is_list_price_inflated</text>
+
+    <!-- review -->
+    <rect x="650" y="410" width="250" height="200" rx="10" fill="#fce7f3" stroke="#be185d" stroke-width="1.5"/>
+    <text x="775" y="434" text-anchor="middle" font-weight="700" font-size="13">F4 · gold_fact_review</text>
+    <text x="662" y="460" font-weight="600">grain: 1 review</text>
+    <text x="662" y="481">transaction fact</text>
+    <text x="662" y="502">star_score, is_positive/negative</text>
+    <text x="662" y="523">comment_length, image_count</text>
+    <text x="662" y="544">date đóng 2 vai trò:</text>
+    <text x="662" y="563">review_date_key, observed_date_key</text>
+    <text x="662" y="584">prod_properties (degenerate)</text>
+
+    <!-- seller daily -->
+    <rect x="940" y="410" width="230" height="200" rx="10" fill="#dcfce7" stroke="#15803d" stroke-width="1.5"/>
+    <text x="1055" y="434" text-anchor="middle" font-weight="700" font-size="13">F5 · gold_fact_seller_daily</text>
+    <text x="952" y="460" font-weight="600">grain: 1 seller × 1 ngày</text>
+    <text x="952" y="481">periodic snapshot</text>
+    <text x="952" y="502">seller_rate_eod</text>
+    <text x="952" y="523">new_seller_ratings</text>
+    <text x="952" y="544">active_products</text>
+    <text x="952" y="565">units_sold_est, revenue_est</text>
+    <text x="952" y="586">(tổng hợp từ F1 + F2)</text>
+  </g>
+
+  <!-- ===================== LEGEND ===================== -->
+  <g font-size="12" fill="#374151">
+    <line x1="40" y1="645" x2="80" y2="645" stroke="#2563eb" stroke-width="2.5"/>
+    <text x="88" y="649">F1 / F2 / F3 → dimension</text>
+    <line x1="290" y1="645" x2="330" y2="645" stroke="#db2777" stroke-width="2.5"/>
+    <text x="338" y="649">F4 → dimension</text>
+    <line x1="470" y1="645" x2="510" y2="645" stroke="#16a34a" stroke-width="2.5" stroke-dasharray="7 5"/>
+    <text x="518" y="649">F5 → dimension</text>
+    <text x="680" y="649">Mỗi đường là quan hệ N : 1 (nhiều dòng fact → 1 dòng dimension). 🔑 = khóa chính.</text>
+  </g>
+</svg>

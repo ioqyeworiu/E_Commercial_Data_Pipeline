@@ -1,0 +1,58 @@
+# Cấu hình Streamlit cho dashboard (đọc từ thư mục làm việc /app trong container)
+
+[server]
+headless = true
+runOnSave = true
+maxUploadSize = 1
+
+[browser]
+gatherUsageStats = false
+
+[client]
+# Ẩn nút Deploy / menu dành cho developer
+toolbarMode = "viewer"
+
+[runner]
+fastReruns = true
+
+# ---------------------------------------------------------------------------------------------------
+# Theme: hai bộ màu sáng / tối, người xem đổi trong menu ⋮ > Settings (mặc định theo hệ điều hành).
+# Màu lấy từ core/theme.py (bảng màu dataviz đã kiểm định CVD). Nền trang = "plane", card = "surface".
+# ---------------------------------------------------------------------------------------------------
+[theme]
+font = "system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif"
+headingFont = "system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif"
+baseRadius = "0.6rem"
+buttonRadius = "0.5rem"
+showSidebarBorder = true
+metricValueFontWeight = 650
+
+[theme.light]
+primaryColor = "#2a78d6"
+backgroundColor = "#f4f4f1"
+secondaryBackgroundColor = "#ebeae5"
+textColor = "#1c1b19"
+linkColor = "#1c5cab"
+borderColor = "#dcdbd3"
+dataframeBorderColor = "#e1e0d9"
+dataframeHeaderBackgroundColor = "#f0efec"
+chartCategoricalColors = ["#2a78d6", "#eb6834", "#1baf7a", "#eda100", "#e87ba4", "#008300", "#6250d6", "#e34948"]
+
+[theme.light.sidebar]
+backgroundColor = "#fcfcfb"
+secondaryBackgroundColor = "#f0efec"
+
+[theme.dark]
+primaryColor = "#3987e5"
+backgroundColor = "#0d0d0d"
+secondaryBackgroundColor = "#262624"
+textColor = "#f0efec"
+linkColor = "#86b6ef"
+borderColor = "#33332f"
+dataframeBorderColor = "#2c2c2a"
+dataframeHeaderBackgroundColor = "#222220"
+chartCategoricalColors = ["#3987e5", "#d95926", "#199e70", "#c98500", "#d55181", "#0ca30c", "#9085e9", "#e66767"]
+
+[theme.dark.sidebar]
+backgroundColor = "#151514"
+secondaryBackgroundColor = "#262624"

@@ -31,10 +31,77 @@ services:
       dockerfile: comment_crawler.dockerfile
     image: comment-crawler-selenium
     container_name: comment_crawler_1
-    shm_size: "2gb"        
-    mem_limit: 2.5g           
+    shm_size: "2gb"
+    mem_limit: 2.5g
     cpus: 2
     env_file: comment_crawler.env
     volumes:
       - ./metrics:/app/metrics
     restart: unless-stopped
+
+  # Crawler v2 gọi thẳng JSON API -> topic data_crawled_v2.
+  # Có profile "v2" nên `up` cả file sẽ KHÔNG tự chạy service này; chạy riêng bằng:
+  #   docker compose -f crawler-docker-compose.yml --profile v2 up -d --build api-crawler-1
+  api-crawler-1:
+    build:
+      context: .
+      dockerfile: api_crawler.dockerfile
+    image: api-crawler
+    container_name: api_crawler_1
+    profiles: ["v2"]
+    mem_limit: 512m
+    cpus: 1
+    env_file: api_crawler.env
+    volumes:
+      - ./metrics:/app/metrics
+      - ./samples:/app/out
+    networks:
+      - kafka-net
+      - postgresql-net
+    restart: unless-stopped
+
+  # 2 crawler v2 tách riêng: sản phẩm (dùng crawl_state) và review (dùng review_crawl_state).
+  # Profile "v2-split" để không tự chạy khi `up` cả file. Chạy bằng (PHẢI ghi tên service,
+  # nếu không compose sẽ bật luôn các crawler Selenium không có profile):
+  #   docker compose -f crawler-docker-compose.yml --profile v2-split up -d --build api-product-crawler-1 api-review-crawler-1
+  api-product-crawler-1:
+    build:
+      context: .
+      dockerfile: api_product_crawler.dockerfile
+    image: api-product-crawler
+    container_name: api_product_crawler_1
+    profiles: ["v2-split"]
+    mem_limit: 512m
+    cpus: 1
+    env_file: api_product_crawler.env
+    volumes:
+      - ./metrics:/app/metrics
+      - ./samples:/app/out
+    networks:
+      - kafka-net
+      - postgresql-net
+    restart: unless-stopped
+
+  api-review-crawler-1:
+    build:
+      context: .
+      dockerfile: api_review_crawler.dockerfile
+    image: api-review-crawler
+    container_name: api_review_crawler_1
+    profiles: ["v2-split"]
+    mem_limit: 512m
+    cpus: 1
+    env_file: api_review_crawler.env
+    volumes:
+      - ./metrics:/app/metrics
+      - ./samples:/app/out
+    networks:
+      - kafka-net
+      - postgresql-net
+    restart: unless-stopped
+
+networks:
+  kafka-net:
+    external: true
+  postgresql-net:
+    external: true

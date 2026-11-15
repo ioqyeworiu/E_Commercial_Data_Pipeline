@@ -1,7 +1,8 @@
 CREATE TABLE bronze_product_snapshot(
     url_id BIGINT,
     title String,
-    brand String,
+    brand String,                       -- tên gốc từ nguồn (chỉ trim)
+    brand_normalized Nullable(String),  -- khóa chuẩn hóa để gộp brand, NULL khi không có brand
     price float,
     discount float,
     sell_price float,
@@ -19,11 +20,14 @@ CREATE TABLE bronze_product_snapshot(
     additional_info String,
     observed_at DATETIME('Asia/Ho_Chi_Minh'),
     ingested_at DATETIME('Asia/Ho_Chi_Minh'),
-    idempotency String
+    idempotency_key String
 )
 ENGINE MergeTree
 PARTITION BY toDate(ingested_at)
 ORDER BY (url_id, observed_at);
+
+-- Migration cho bảng đã tạo trước đó:
+-- ALTER TABLE bronze_product_snapshot ADD COLUMN IF NOT EXISTS brand_normalized Nullable(String) AFTER brand;
 
 
 CREATE TABLE bronze_user_review(

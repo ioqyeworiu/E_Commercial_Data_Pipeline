@@ -1,0 +1,5 @@
+"run","query_kind","queries","sum_sec","max_sec","read_rows","written_rows","max_memory_bytes","spill_bytes"
+"A_old_dropDuplicates","Insert",10035,951,3,10000000,10000000,9619440,0
+"A_old_dropDuplicates","Select",2,1032,1032,10050000,0,151191328,0
+"B_dedup_in_clickhouse","Insert",10000,801,3,10000000,10000000,9616533,0
+"B_dedup_in_clickhouse","Select",4,2672,2646,60349742,0,569164822,0

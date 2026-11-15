@@ -1,0 +1,10 @@
+"variant","type","sec","read_rows","result_rows","memory_bytes","spill_bytes"
+"pretest_inorder_0","QueryFinish",42,10050000,1,1338964409,851622029
+"pretest_inorder_1","QueryFinish",33.7,10050000,1,1221756967,851621127
+"pretest_spark_shape","ExceptionWhileProcessing",29.9,1302487,0,2425198628,0
+"pre_inorder_bs1024","QueryFinish",133.9,10050000,10000000,1527080356,0
+"pre_bucket4_hash","QueryFinish",57.5,10050000,2480600,1201542941,598559514
+"pre_bucket8_hash","QueryFinish",29,10050000,1229600,1200218785,296460276
+"pre_v2_inorder_1","QueryFinish",77.5,40200000,10000000,1268736498,0
+"pre_v2_inorder_0","QueryFinish",80.9,40200000,10000000,1297515890,1702103592
+"pre_v3","QueryFinish",41.7,40200000,10000000,563111007,0

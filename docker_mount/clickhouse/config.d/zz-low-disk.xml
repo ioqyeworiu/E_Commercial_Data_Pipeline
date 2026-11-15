@@ -1,0 +1,37 @@
+<!--
+  Giảm dung lượng đĩa ClickHouse tăng dần sau mỗi lần chạy pipeline.
+  Mount vào /etc/clickhouse-server/config.d/zz-low-disk.xml (xem docker-compose.yml).
+  Chỉ mount ĐÚNG FILE này, không mount cả thư mục config.d: image đã có sẵn
+  config.d/docker_related_config.xml, mount cả thư mục sẽ che mất nó.
+  Lý do từng mục: docs/DISK_USAGE_REPORT.md.
+-->
+<clickhouse>
+    <!-- Mặc định của image: level=trace, size=1000M, count=10 -> log file có thể lên ~20 GB
+         (server.log + err.log). Đo được ~80 MB log mỗi lần chạy pipeline, phần lớn là trace. -->
+    <logger>
+        <level>warning</level>
+        <size>100M</size>
+        <count>3</count>
+    </logger>
+
+    <!-- Các bảng log hệ thống không dùng trong project, không có TTL nên phình mãi.
+         text_log còn ghi lại y hệt log file ở mức trace. -->
+    <trace_log remove="1"/>
+    <text_log remove="1"/>
+    <metric_log remove="1"/>
+    <asynchronous_metric_log remove="1"/>
+    <query_metric_log remove="1"/>
+
+    <!-- Giữ lại query_log / part_log (dùng để đo spill, thời gian, memory của loader và DQ)
+         nhưng chỉ 7 ngày. -->
+    <query_log>
+        <ttl>event_date + INTERVAL 7 DAY DELETE</ttl>
+    </query_log>
+    <part_log>
+        <ttl>event_date + INTERVAL 7 DAY DELETE</ttl>
+    </part_log>
+
+    <!-- Trần tổng dung lượng file tạm (spill của sort / group by / join) của cả server.
+         Spill lớn nhất đo được ~1 GB/query; vượt 10 GB thì query lỗi thay vì làm đầy ổ E:. -->
+    <max_temporary_data_on_disk_size>10000000000</max_temporary_data_on_disk_size>
+</clickhouse>

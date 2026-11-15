@@ -224,9 +224,16 @@ services:
       - "8081:8080"
     cpus: 1
     mem_limit: 1g
+    environment:
+      # Shuffle/spill của executor ghi ra bind mount trên E: thay vì /tmp trong container:
+      # /tmp nằm trong docker_data.vhdx, Spark xoá file rồi vhdx cũng không co lại (docs/DISK_USAGE_REPORT.md)
+      SPARK_LOCAL_DIRS: /opt/spark/local
+      # Tự xoá work/app-* (jar + log executor, ~74 MB mỗi lần spark-submit) của app đã dừng quá 3 ngày
+      SPARK_WORKER_OPTS: "-Dspark.worker.cleanup.enabled=true -Dspark.worker.cleanup.interval=3600 -Dspark.worker.cleanup.appDataTtl=259200"
     volumes:
       - ./docker_mount/spark_standalone/spark_worker_1/logs:/opt/spark/logs
       - ./docker_mount/spark_standalone/spark_worker_1/work:/opt/spark/work
+      - ./docker_mount/spark_standalone/spark_worker_1/local:/opt/spark/local
     networks:
       - spark-net
       - kafka-net
@@ -259,9 +266,13 @@ services:
       - "8082:8080"
     cpus: 1
     mem_limit: 1g
+    environment:
+      SPARK_LOCAL_DIRS: /opt/spark/local   # xem giải thích ở spark_worker_1
+      SPARK_WORKER_OPTS: "-Dspark.worker.cleanup.enabled=true -Dspark.worker.cleanup.interval=3600 -Dspark.worker.cleanup.appDataTtl=259200"
     volumes:
       - ./docker_mount/spark_standalone/spark_worker_2/logs:/opt/spark/logs
       - ./docker_mount/spark_standalone/spark_worker_2/work:/opt/spark/work
+      - ./docker_mount/spark_standalone/spark_worker_2/local:/opt/spark/local
     networks:
       - spark-net
       - kafka-net
@@ -299,8 +310,8 @@ services:
     ports:
       - "8123:8123"  
       - "9000:9000"
-    cpus: 1
-    mem_limit: 1g
+    cpus: 2
+    mem_limit: 3g
     environment:
       CLICKHOUSE_USER: clickhouse
       CLICKHOUSE_PASSWORD_FILE: /run/secrets/clickhouse_admin_password
@@ -316,19 +327,65 @@ services:
     volumes:
       - ./docker_mount/clickhouse/data:/var/lib/clickhouse
       - ./docker_mount/clickhouse/logs:/var/log/clickhouse-server
+      # Giảm log + TTL bảng system.*_log + trần spill. Chỉ mount đúng 1 file (không che docker_related_config.xml)
+      - ./docker_mount/clickhouse/config.d/zz-low-disk.xml:/etc/clickhouse-server/config.d/zz-low-disk.xml:ro
     networks:
       - clickhouse-net
     healthcheck:
+      # Image distroless không có shell, curl, wget -> phải dùng dạng CMD (mỗi tham số 1 phần tử), không dùng được
+      # CMD-SHELL hay $(cat /run/secrets/...). Endpoint HTTP /ping không cần đăng nhập ; clickhouse local gọi nó qua url().
+      # http_max_tries = 1: mặc định url() thử lại 10 lần có backoff -> server chết thì probe treo thay vì báo lỗi ngay.
       test:
         - CMD
-        - >-
-          clickhouse-client
-          --user=clickhouse
-          --password=/run/secrets/clickhouse_admin_password
-          --query='SELECT 1'      
+        - clickhouse
+        - local
+        - --query
+        - "SELECT * FROM url('http://127.0.0.1:8123/ping', RawBLOB) SETTINGS http_max_tries = 1, http_connection_timeout = 2, http_receive_timeout = 3, http_send_timeout = 3"
       interval: 30s
       timeout: 10s
       retries: 5
+      start_period: 30s
+
+  # Dashboard Streamlit đọc data mart (src/python/dashboard, README.md trong đó).
+  # Code và file SQL dashboard được mount read-only: sửa xong chỉ cần F5 / "Rerun", không cần rebuild.
+  dashboard:
+    build:
+      context: ./src/python/dashboard
+      dockerfile: dashboard.dockerfile
+    image: ecom-dashboard:latest
+    container_name: streamlit_dashboard
+    hostname: dashboard
+    restart: unless-stopped
+    depends_on:
+      clickhouse_server:
+        condition: service_healthy
+    ports:
+      - "8501:8501"
+    cpus: 1
+    mem_limit: 1g
+    environment:
+      CLICKHOUSE_HOST: clickhouse-server
+      CLICKHOUSE_PORT: 8123
+      CLICKHOUSE_DB: ecommercial_warehouse
+      CLICKHOUSE_USER_FILE: /run/secrets/clickhouse_admin_username
+      CLICKHOUSE_PASSWORD_FILE: /run/secrets/clickhouse_admin_password
+      DASHBOARD_SQL_DIR: /sql
+      TZ: Asia/Ho_Chi_Minh
+      # Bind mount từ Windows không phát sự kiện inotify -> watcher của Streamlit phải poll
+      STREAMLIT_SERVER_FILE_WATCHER_TYPE: poll
+    secrets:
+      - clickhouse_admin_username
+      - clickhouse_admin_password
+    volumes:
+      - ./src/python/dashboard:/app:ro
+      - ./src/sql_script/clickhouse/query_dashboard:/sql:ro
+    networks:
+      - clickhouse-net
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8501/_stcore/health', timeout=3)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
       start_period: 30s
 
 networks:

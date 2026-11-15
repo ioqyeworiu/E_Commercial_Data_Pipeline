@@ -1,0 +1,6 @@
+requests>=2.31
+confluent-kafka
+SQLAlchemy>=2.0
+psycopg2-binary
+python-dotenv
+tzdata

@@ -1,0 +1,32 @@
+chạy load_bronze_product_snapshot:
+
+/opt/spark/bin/spark-submit \
+  --master spark://spark-master:7077 \
+  --deploy-mode client \
+  --driver-memory 500m \
+  --executor-cores 1 \
+  --executor-memory 500m \
+  --total-executor-cores 3 \
+  --conf spark.executor.instances=3 \
+  --conf spark.driver.host=spark-master \
+  --conf spark.driver.bindAddress=0.0.0.0 \
+  --packages org.apache.spark:spark-sql-kafka-0-10_2.13:4.2.0,com.clickhouse:clickhouse-jdbc:0.8.3 \
+  --conf spark.jars.ivy=/tmp/.ivy \
+  load_bronze_product_snapshot.py
+
+
+
+/opt/spark/bin/spark-submit \
+  --master spark://spark-master:7077 \
+  --deploy-mode client \
+  --conf spark.driver.host=spark-master \
+  --conf spark.driver.bindAddress=0.0.0.0 \
+  --packages org.apache.spark:spark-sql-kafka-0-10_2.13:4.2.0,com.clickhouse:clickhouse-jdbc:0.8.3 \
+  --conf spark.jars.ivy=/tmp/.ivy \
+  load_bronze_product_snapshot.py
+
+
+
+
+
+"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Edge/91.0.864.37"
