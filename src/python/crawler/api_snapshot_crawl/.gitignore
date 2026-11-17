@@ -1,0 +1,4 @@
+# dữ liệu cào được giao qua Google Drive, không commit
+*.csv
+*.csv.gz
+*.zip
